@@ -22,9 +22,10 @@ udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 address = ('localhost', 12345)
 port = 1024
 
-#Receive data from client
+#Receive M1 from client
 data, addr = udp_socket.recvfrom(port)
-print(f"Received data: {data.decode()}")
+message1 = data.decode()
+print(f"Received data: {message1}")
 
 #Verify deviceID
 if(true): #TODO: check einbauen
@@ -36,14 +37,38 @@ else:
 r1 = random.randint(0,randmax)
 C1 = generateChallenge(p)
 
-#Send second message back to client
+# Generate key k1 from the keys in the challenge    
+k1 = 0 
+for i in C1_received:
+    k1 = k1^SecureVault.getKey(i) # TODO k1 should be of size m bits now --- test that
+
+#Send M2 back to client
 try:
     M2 = str(C1) + str(r1)    #TODO: Tupel
     udp_socket.sendto(message.encode(M2), address)
 except socket.error as e:
     print(f"Send M2 failed: {e}")
-        
+    
+#Receive M3 from client
+data, addr = udp_socket.recvfrom(port)
+message3 = data.decode()
+print(f"Received data: {message3}")
 
+#Verify the IoT devices response
+
+#TODO: k1?
+#TODO: r1?
+
+if(false): #TODO: k1 oder r1 passen nicht?
+    #TODO: Verbindung mit Client schließen
+    
+#Send M4 back to client
+try:
+    M4 = 2 # TODO Enc(k2^t1, r2||t2)
+    udp_socket.sendto(message.encode(M4), address)
+except socket.error as e:
+    print(f"Send M4 failed: {e}")
 
 # Close the socket
 udp_socket.close()
+print("Server Socket was closed")
