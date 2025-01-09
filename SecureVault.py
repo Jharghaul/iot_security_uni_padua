@@ -9,7 +9,9 @@ masterkeys = ["doagW31MNuBTnvbrlDikILQI08vEBhZyhIRI96pc4RcmEimFOjtfbvqrNQ1COlBmc
 
 keys = []
 digestMode = hashlib.sha512
+key_length_bits = digestMode().digest_size * 8
 
+#TODO: description
 def initialize(number, digestmode=hashlib.sha512):
     
     digestMode = digestmode
@@ -27,12 +29,14 @@ def initialize(number, digestmode=hashlib.sha512):
 
     return False
 
+#TODO: description
 def getKey(index):
     if index >= 0 & index < len(keys):
         return keys[index]
     
     return None
 
+#TODO: description
 def changeKeys(message):
     digest = hmac.new(keys, message.encode("utf-8"), digestMode).digest()
     

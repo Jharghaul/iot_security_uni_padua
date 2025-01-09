@@ -32,7 +32,7 @@ try:
     C1 = Helpers.generateChallenge()
 
     # Generate key k1 from the keys in the challenge    
-    k1 = bytes(512) #TODO: schlüssellänge aus vault
+    k1 = bytes(Vault.key_length_bits)
     for i in C1:
         k1 = Helpers.xor_bytes(k1, Vault.getKey(i))
 

@@ -3,18 +3,20 @@ import SecureVault as sv
 import random
 import Helpers
 
-# Client setup
+# Client socket setup
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = Helpers.server_address
 
-#Device settings
+#IOT device settings
 DeviceId = 1337
 SessionId = 42
+
+#SecureVault initialization = Key exchange
 Vault = sv
 Vault.initialize(Helpers.n)
 
 try:
-    #Send first message
+    #Send M1
     M1 = str(DeviceId) + str(SessionId)
 
     client_socket.sendto(M1.encode(), server_address)
@@ -26,13 +28,13 @@ try:
 
     C1_received = Helpers.generateChallenge()  #TODO: aus received data rausnehmen
 
-    #Check if correct randomness
+    #Check if r1 has the right value
     if(False):    #TODO: r1 rausziehen r1_received!=r1
         print("Error, not the correct randomness")
         client_socket.close() 
 
     # Generate key k1 from the keys in the challenge    
-    k1 = bytes(512) #TODO: schlüssellänge aus vault
+    k1 = bytes(Vault.key_length_bits) 
     for i in C1_received:
         k1 = Helpers.xor_bytes(k1, Vault.getKey(i))
         
