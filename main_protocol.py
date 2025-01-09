@@ -24,7 +24,7 @@ M1 = str(DeviceId) + str(SessionId)
 
 
 # TODO Receive M2={C1,r1}
-C1_received = {0,1,2,3}
+C1_received = C1
 # if(r1_received!=r1):
 #   print("Error, not the correct randomness")
 #   return
