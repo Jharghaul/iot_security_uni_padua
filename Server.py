@@ -1,5 +1,6 @@
 import socket
 import time
+import random
 
 #Define variables
 n = 1000 # size of key vault == number of keys K[0] ... K[n-1]
@@ -28,7 +29,7 @@ message1 = data.decode()
 print(f"Received data: {message1}")
 
 #Verify deviceID
-if(true): #TODO: check einbauen
+if(True): #TODO: check einbauen
     print("The device is valid")
 else:
     print("Error, aborting, device invalid")
@@ -59,8 +60,8 @@ print(f"Received data: {message3}")
 #TODO: k1?
 #TODO: r1?
 
-if(false): #TODO: k1 oder r1 passen nicht?
-    #TODO: Verbindung mit Client schließen
+if(False): #TODO: k1 oder r1 passen nicht?
+    print("sollte nicht passieren") #TODO: Verbindung mit Client schließen
     
 #Send M4 back to client
 try:

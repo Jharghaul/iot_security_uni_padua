@@ -1,5 +1,6 @@
 import socket
 import SecureVault as sv
+import random
 
 #TODO: eigene Klasse
 n = 1000 # size of key vault == number of keys K[0] ... K[n-1]
@@ -40,7 +41,7 @@ print(f"Received data: {data.decode()}")
 C1_received = generateChallenge(p)  #TODO: aus received data rausnehmen
 
 #Check if correct randomness
-if(false):    #TODO: r1 rausziehen r1_received!=r1
+if(False):    #TODO: r1 rausziehen r1_received!=r1
     print("Error, not the correct randomness")
     udp_socket.close() 
 
@@ -71,9 +72,9 @@ print(f"Received data: {message4}")
 
 #TODO: decrypt with k2 XOR t1 -> steht r2 drin?
 
-if(true): #r2 in M4
+if(True): #r2 in M4
     print("hat alles gepasst. yippieeeehhehhe")
-else
+else:
     print("uppsssiiii")
 
 # Change keys in vault and close the socket
