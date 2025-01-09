@@ -16,11 +16,11 @@ def initialize(number, digestmode=hashlib.sha512):
 
     for i in range(number):
         if i < 5:
-            hmacObj = hmac.new(masterkeys[i], None, digestMode)
+            hmacObj = hmac.new(masterkeys[i].encode("utf-8"), None, digestMode)
             keys.append(hmacObj.digest())
         else:
-            hmacObj = hmac.new(masterkeys[i%5], None, digestMode)
-            keys.append(hmacObj.digest(keys[i-5]))
+            hmacObj = hmac.new(masterkeys[i%5].encode("utf-8"), keys[i-5], digestMode)
+            keys.append(hmacObj.digest())
     
     if len(keys) == number:
         return True    
@@ -28,7 +28,7 @@ def initialize(number, digestmode=hashlib.sha512):
     return False
 
 def getKey(index):
-    if index > 0 & index < len(keys):
+    if index >= 0 & index < len(keys):
         return keys[index]
     
     return None
@@ -38,3 +38,5 @@ def changeKeys(message):
     
     for i in range(len(keys)):
         keys[i] = keys[i]^digest
+        
+        
