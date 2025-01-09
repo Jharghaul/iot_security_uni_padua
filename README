@@ -1,6 +1,9 @@
-The objective of this report is to implement the authentication protocol as described in
-the provided Paper. As well as that, we aim to provide an implementation of Secure Vaults, a storage
+# Final Project for the Course on Cyber-Physical Systems and IoT Security
+
+The objective of this project is to implement the authentication protocol as described in
+the provided reference paper. As well as that, we aim to provide an implementation of Secure Vaults, a storage
 capability for keys.
+
 The authentication protocol in use is a modulation of a three-way handshake protocol,
 whereby both client and server challenge each other to provide means to authenticate
 both parties.

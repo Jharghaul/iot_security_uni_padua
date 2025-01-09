@@ -34,7 +34,7 @@ def getKey(index):
     return None
 
 def changeKeys(message):
-    digest = hmac.new(keys, message, digestMode).digest()
+    digest = hmac.new(keys, message.encode("utf-8"), digestMode).digest()
     
     for i in range(len(keys)):
         keys[i] = keys[i]^digest
