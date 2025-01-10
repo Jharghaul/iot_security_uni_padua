@@ -1,11 +1,12 @@
 import socket
-import time
+import datetime
 import random
 import SecureVault as sv
 import Helpers
 
 Vault = sv
 Vault.initialize(Helpers.n)
+sessionIds = []
 
 #Server setup
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -13,16 +14,19 @@ server_socket.bind(Helpers.server_address)
 
 
 print("Server is listening on port 12346...")
+# Maybe we want to use https://github.com/twisted/twisted for easier communication
 
 try:
     #Receive M1 from client
     data, client_address = server_socket.recvfrom(Helpers.buffer_size)
     message1 = data.decode()
-    print("Received M1")
+    print(Helpers.now() + " Received M1", message1)
+    message1 = message1.split("||")
+    sessionIds.append(message1[1])
 
     #Verify deviceID
-    if(True): #TODO: check einbauen
-        print("The device is valid")
+    if(message1[0]=="1337"): #TODO: check einbauen
+        print(Helpers.now() + " The device is valid")
     else:
         print("Error, aborting, device invalid")
         #TODO: Error werfen
@@ -37,14 +41,14 @@ try:
         k1 = Helpers.xor_bytes(k1, Vault.getKey(i))
 
     #Send M2 back to client
-    M2 = str(C1) + str(r1)    #TODO: Tupel
-    print("Sent M2")
+    M2 = str(C1) + "||" + str(r1)    #TODO: Tupel
+    print(Helpers.now() + " Sent M2")
     server_socket.sendto(M2.encode(), client_address)
 
     #Receive M3 from client
     data, client_address = server_socket.recvfrom(Helpers.buffer_size)
     message3 = data.decode()
-    print("Received M3")
+    print(Helpers.now() + " Received M3")
 
     #Verify the IoT devices response
 
@@ -57,11 +61,11 @@ try:
         #Send M4 back to client
         M4 = "2" # TODO Enc(k2^t1, r2||t2)
         server_socket.sendto(M4.encode(), client_address)
-        print("Sent M4")
+        print(Helpers.now() + " Sent M4")
 except socket.error as e:
     print(f"Send M4 failed: {e}")
 
 finally:
     # Close the socket
     server_socket.close()
-    print("Server Socket was closed")
+    print(Helpers.now() + " Server Socket was closed")

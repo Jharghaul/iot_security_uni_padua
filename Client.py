@@ -1,5 +1,6 @@
 import socket
 import SecureVault as sv
+import datetime
 import random
 import Helpers
 
@@ -17,21 +18,24 @@ Vault.initialize(Helpers.n)
 
 try:
     #Send M1
-    M1 = str(DeviceId) + str(SessionId)
-
+    M1 = str(DeviceId) +"||"+  str(SessionId)
     client_socket.sendto(M1.encode(), server_address)
-    print("M1 send")  
+    print(Helpers.now() + " M1 send")  
             
     # Receive M2 from server
     data, addr = client_socket.recvfrom(Helpers.buffer_size)
-    print("M2 received")
+    print(Helpers.now() + " M2 received")
+    data = data.decode().split("||")
+    tmp = data[0]
+    tmp = tmp[1: -1].split(",")
+    C1_received = []
+    for i in tmp:
+        C1_received.append(int(i))
 
-    C1_received = Helpers.generateChallenge()  #TODO: aus received data rausnehmen
+    #C1_received = Helpers.generateChallenge()  #TODO: aus received data rausnehmen
 
     #Check if r1 has the right value
-    if(False):    #TODO: r1 rausziehen r1_received!=r1
-        print("Error, not the correct randomness")
-        client_socket.close() 
+    r1_received = data[1]
 
     # Generate key k1 from the keys in the challenge    
     k1 = bytes(Vault.key_length_bits) 
@@ -47,19 +51,20 @@ try:
     r2 = random.randint(0, Helpers.randmax)
 
     #Send M3 to server
-    M3 = "blavlavlavla" #TODO: Enc(k1, r1||t1||{C2,r2})
+    #TODO: M3 = Enc(k1, r1||t1||{C2,r2})
+    M3 = "Enc(" +str(k1) + r1_received + "||" +str(t1)+"||"+"{"+str(C2) + "," + str(r2) + "})"  
     client_socket.sendto(M3.encode(), server_address)
-    print("M3 send")  
+    print(Helpers.now() + " M3 send")  
   
     # Receive M4 from server
     data, addr = client_socket.recvfrom(Helpers.buffer_size)
     message4= data.decode()
-    print("M4 received")
+    print(Helpers.now() + " M4 received")
 
     #TODO: decrypt with k2 XOR t1 -> steht r2 drin?
 
     if(True): #r2 in M4
-        print("r2 check succeded")
+        print(Helpers.now() + " r2 check succeded")
     else:
         print("r2 check failed ")
 except socket.error as e:

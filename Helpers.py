@@ -1,4 +1,5 @@
 import random
+import datetime
 
 #Global variables
 n = 1000 # size of key vault == number of keys K[0] ... K[n-1]
@@ -18,3 +19,6 @@ def generateChallenge():
 # Function to xor two bytes
 def xor_bytes(b1, b2):
     return bytes(a ^ b for a, b in zip(b1, b2))
+
+def now():
+    return str(datetime.datetime.now().time())
