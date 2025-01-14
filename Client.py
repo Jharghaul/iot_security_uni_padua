@@ -19,21 +19,19 @@ Vault.initialize(Helpers.n)
 
 try:
     #Send M1
-    M1 = "M1||" + str(DeviceId) +"||"+  str(SessionId)
+    M1 = str(DeviceId) +"||"+  str(SessionId)
     client_socket.sendto(M1.encode(), server_address)
-    print(Helpers.now() + " M1 send")  
+    print(Helpers.now() + " M1 sent")  
             
     # Receive M2 from server
     data, addr = client_socket.recvfrom(Helpers.buffer_size)
     print(Helpers.now() + " M2 received")
-    data = data.decode().split("||")
+    data = data.decode()[1:-1].split("||") # remove { } and split
     tmp = data[0]
     tmp = tmp[1: -1].split(",")
     C1_received = []
     for i in tmp:
         C1_received.append(int(i))
-
-    #C1_received = Helpers.generateChallenge()  #TODO: aus received data rausnehmen
 
     #Check if r1 has the right value
     r1_received = data[1]
@@ -53,27 +51,32 @@ try:
 
     #Send M3 to server
     #TODO: M3 = Enc(k1, r1||t1||{C2,r2})
-    M3 = "M3||Enc(" +str(k1) + r1_received + "||" +str(t1)+"||"+"{"+str(C2) + "," + str(r2) + "})"  
-    aesInstance = AESCipher.AESCipher(k1)
-
-    nudelholz = str(k1) + r1_received + "||" +str(t1)+"||"+"{"+str(C2) + "," + str(r2) + "}"
-    encrypted = aesInstance.encrypt(nudelholz)
-    print("Nudelholz: ", nudelholz)
-    print("Encrypted: ", encrypted)
-    client_socket.sendto(M3.encode(), server_address)
-    print(Helpers.now() + " M3 send")  
+    nudelholz = r1_received + "||" +str(t1)+"||"+"{"+str(C2) + "," + str(r2) + "}" # TODO? Make a set of C2, r2
+    M3 = Helpers.encrypt(k1, nudelholz)
+    client_socket.sendto(M3, server_address)
+    print(Helpers.now() + " M3 sent")  
   
     # Receive M4 from server
     data, addr = client_socket.recvfrom(Helpers.buffer_size)
     message4= data.decode()
     print(Helpers.now() + " M4 received")
 
-    #TODO: decrypt with k2 XOR t1 -> steht r2 drin?
+    k2 = bytes(Vault.key_length_bits) 
+    for i in C2:
+        k2 = Helpers.xor_bytes(k2, Vault.getKey(i))
 
-    if(True): #r2 in M4
+    print("This is m4: ", message4)
+    decrypted = Helpers.decrypt(k2, message4)
+    #TODO: decrypt with k2 XOR t1 -> steht r2 drin?
+    print("Decrypted: \n", decrypted)
+
+    if(decrypted.split("||")[0]==str(r2)): #r2 in M4
         print(Helpers.now() + " r2 check succeded")
     else:
         print("r2 check failed ")
+
+
+
 except socket.error as e:
         print(f"Something failed: {e}")
 finally:
