@@ -1,5 +1,6 @@
 import random
 import datetime
+import AESCipher
 
 #Global variables
 n = 1000 # size of key vault == number of keys K[0] ... K[n-1]
@@ -22,3 +23,13 @@ def xor_bytes(b1, b2):
 
 def now():
     return str(datetime.datetime.now().time())
+
+def encrypt(key, message):
+    aesInstance = AESCipher.AESCipher(key)
+    return aesInstance.encrypt(message)
+
+def decrypt(key, message):
+    aesInstance = AESCipher.AESCipher(key)
+    return aesInstance.decrypt(message)
+
+
