@@ -4,8 +4,8 @@ import datetime
 #Global variables
 n = 1000 # size of key vault == number of keys K[0] ... K[n-1]
 p = 200  # size of challenge, *p<n* 
-randmax = 1e10  
-buffer_size = 1024
+randmax = int(1e10)
+buffer_size = 1024*1024
 server_address = ('localhost', 12346) #address of the server
 
 

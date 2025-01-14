@@ -8,11 +8,11 @@ masterkeys = ["doagW31MNuBTnvbrlDikILQI08vEBhZyhIRI96pc4RcmEimFOjtfbvqrNQ1COlBmc
               "kDJzv7kw12nNnc0AgQ5sYg2tKoevjX8wC0d64Dtmk8bRsDMExHNsEbfn8RabictgsLyt5ZbU0h38tGgXjKuxyIjwGYWjIOspZNLjPYMHAtNGyqeGKI9NrlV43G9tSjwVhPekpi4FAiYBzXJxTMd1GGtgIOQccwOX8w6MmJ6OJ0uJMcGbgb4pV3wMVElleYVd1L2p5YYRdhibWo0udRlQJ0gnmDqjULMbJClGn508sixnsuCOZocppDBzMlWVUGkgdjVniCa6FfZcKjxxVxh6kt40L1vECmXglp2YkX1BzEFE6Xm0qhtV2Q2W64ZIgFuSe1PJSrhiQaohXQZ1VO3NQkiiJHw6KswObKBIh9zuBhNNtTJvE3AeLI0nnIaGp9VJjw1c9Egua489Bw0vOD5D22XleNe18uRZI75PyiZsOe3Jv8IiGiJkGdK6utLHfIrULOZPg5mjlK1UIimqajnZ7cZmXg3H7DdH08vzdhPB26D4751sE3dk0T9NvEsiYj9g"]
 
 keys = []
-digestMode = hashlib.sha512
+digestMode = hashlib.sha256
 key_length_bits = digestMode().digest_size * 8
 
 #TODO: description
-def initialize(number, digestmode=hashlib.sha512):
+def initialize(number, digestmode=hashlib.sha256):
     
     digestMode = digestmode
 

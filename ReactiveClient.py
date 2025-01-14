@@ -17,16 +17,48 @@ SessionId = 42
 Vault = sv
 Vault.initialize(Helpers.n)
 
-try:
+def initiate_handshake():
+    send_M1()
+
+    try:
+        receive_message()
+
+    except socket.error as e:
+            print(f"Something failed: {e}")
+    finally:
+        # Change keys in vault and close the socket
+        #Vault.changeKeys("irgendwas") #TODO: richtige Message reinschreiben
+        client_socket.shutdown(0)
+        client_socket.close()
+        print("Client Socket was closed")
+
+def receive_message():
+    data, addr = client_socket.recvfrom(Helpers.buffer_size)
+    print(Helpers.now() + " message received: " + data.decode()[0:2])
+    data = data.decode().split("||")
+    match data[0]:
+        case "M2":
+            print("M2 arrived")
+            handle_M2(data[1:])
+        case "M4":
+            handle_M4(data[1:])
+        case default:
+            print("Something unexpected happened, abortint")
+            client_socket.shutdown()
+            client_socket.close()
+            print("Client Socket was closed")
+
+
+
+def send_M1():
     #Send M1
     M1 = "M1||" + str(DeviceId) +"||"+  str(SessionId)
     client_socket.sendto(M1.encode(), server_address)
     print(Helpers.now() + " M1 send")  
-            
+
+
+def handle_M2(data):            
     # Receive M2 from server
-    data, addr = client_socket.recvfrom(Helpers.buffer_size)
-    print(Helpers.now() + " M2 received")
-    data = data.decode().split("||")
     tmp = data[0]
     tmp = tmp[1: -1].split(",")
     C1_received = []
@@ -51,18 +83,30 @@ try:
 
     r2 = random.randint(0, Helpers.randmax)
 
+ #def send_M3(k1, r1_received, t1, C2, r2):
     #Send M3 to server
     #TODO: M3 = Enc(k1, r1||t1||{C2,r2})
-    M3 = "M3||Enc(" +str(k1) + r1_received + "||" +str(t1)+"||"+"{"+str(C2) + "," + str(r2) + "})"  
+    print("k1: ", k1)
+    print("r1_received: ", r1_received)
+    print("t1: ", t1)
+    #print("C2: ", C2)
+    print("r2: ", r2)
+
+    #M3 = "M3||Enc(" +str(k1) +"||"+ r1_received + "||" +str(t1)+"||"+"{"+str(C2) + "," + str(r2) + "})"
+    #k1 = "Hello"
     aesInstance = AESCipher.AESCipher(k1)
 
     nudelholz = str(k1) + r1_received + "||" +str(t1)+"||"+"{"+str(C2) + "," + str(r2) + "}"
     encrypted = aesInstance.encrypt(nudelholz)
-    print("Nudelholz: ", nudelholz)
-    print("Encrypted: ", encrypted)
-    client_socket.sendto(M3.encode(), server_address)
+    #print("Nudelholz: ", nudelholz)
+    #print("\nEncrypted: ", encrypted)
+    M3 = "M3||" + str(encrypted)
+    print("\n", M3.encode())
+    #client_socket.sendto(M3.encode(), server_address)
     print(Helpers.now() + " M3 send")  
-  
+
+
+def handle_M4(message4): 
     # Receive M4 from server
     data, addr = client_socket.recvfrom(Helpers.buffer_size)
     message4= data.decode()
@@ -74,11 +118,6 @@ try:
         print(Helpers.now() + " r2 check succeded")
     else:
         print("r2 check failed ")
-except socket.error as e:
-        print(f"Something failed: {e}")
-finally:
-    # Change keys in vault and close the socket
-    Vault.changeKeys("irgendwas") #TODO: richtige Message reinschreiben
 
-    client_socket.close()
-    print("Client Socket was closed")
+
+initiate_handshake()
