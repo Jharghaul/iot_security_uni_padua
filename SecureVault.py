@@ -1,5 +1,6 @@
 import hmac
 import hashlib
+import Helpers
 
 masterkeys = ["doagW31MNuBTnvbrlDikILQI08vEBhZyhIRI96pc4RcmEimFOjtfbvqrNQ1COlBmclqrUS9T62LhH26W7SCGoAjRfNUfNBjUqudXRpZkIuBdJWwRUVT1cJ419mhvTJqj1IilXxOpoyq3gfIlEqz6liZCgKeWujdlis316syZPIOfOHnBf7fKQhFWQabmpX4JjhUscifhFg12AxrtKE0ncqjZTpq3oPMCzpFrvQIcCjcinedRuoZdHTbTYiLlpGwBvYwi5zVTyBxbkABFT5JnRMJQ6EIlEYHAHn6bQ7HMjzCuX1sgleR63cieaqD5kTwOw5KmyfUj8U4BVRCqaCpdqP2eYMZZ6Pp2yv5F88CixRfldhQiWY9rywXegMenVit5653EU4shrYxplTomfZrqqkz5AAktUEFmEPq6t17hxOlpPIEKDm53VDWIXwMvXzoBEfuo5xwxiOJroymg2vekoVbRikKZm7uqX6fA8voyOcs67LVci3c5LNbb15XT8zBJ",
               "9h6OkimozvXV0oq34IBxzer7PFKklUegEj5veAoAT1gfphfzDIABEZdZVWpV4X8qRZruHubdfWV4TRbgsSQoDOlAjlYfHfWBK7MHt7P9YitA7yuAgb1veFYVpU5ChTlpLNqTCnGYeugGJVJoLgrZpqy0eEctMQKqCwBs52p8dCMnRhBDEXPp4iOKJ4Nk4JYU6L3JgzOvmIDvhtgnMEIlc30q5w3qg5UBgTnjktvKrrIZxpn0N1UUEuOH8l91oBTUXoqLotuDEItJCH0Y5aWg8BUd8ZEtbRMbJkdvXVwTGb47DGhE3xE26s8Ipo32T9PboKQOnQCudA59ZLL8uPB9wqCbJsTQ6fJQ8udZ7q6l6EldNOyW2rjNFJCGBB7S8YkLZPbq5GUUeatSov2PpfcqBfW7ANxPvsJA0fB1Rs6kGAUpwK7KGqvU5Z2HqCld3hsQf83wbUb5BiPkoK6ajV5IUNG0AZ0tPEiC1ClsUe1TZyEGLDcKwbziat8jZkhyAbqv",
@@ -11,7 +12,8 @@ keys = []
 digestMode = hashlib.sha256
 key_length_bits = digestMode().digest_size * 8
 
-#TODO: description
+# initializes the secure vault by providing the number of keys that should be stored, as well as optionally the digestmode.
+# generates all keys by hashing the master key (and other keys if # keys > 5)
 def initialize(number, digestmode=hashlib.sha256):
     
     digestMode = digestmode
@@ -29,18 +31,20 @@ def initialize(number, digestmode=hashlib.sha256):
 
     return False
 
-#TODO: description
+# get a single key from the vault by entering its index number
 def getKey(index):
     if index >= 0 & index < len(keys):
         return keys[index]
     
     return None
 
-#TODO: description
+# Each key gets xor with the hmac(key, message)
 def changeKeys(message):
-    digest = hmac.new(keys, message.encode("utf-8"), digestMode).digest()
     
     for i in range(len(keys)):
-        keys[i] = keys[i]^digest
+        digest = hmac.new(keys[i], message.encode("utf-8"), digestMode).digest()
         
+        keys[i] = Helpers.xor_bytes(keys[i], digest)
+       
+
         
