@@ -77,7 +77,7 @@ try:
 
 
 
-except socket.error as e:
+except socket.error as e:   # TODO: feineres Error Handling
         print(f"Something failed: {e}")
 finally:
     # Change keys in vault and close the socket

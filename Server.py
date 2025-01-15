@@ -4,6 +4,8 @@ import random
 import SecureVault as sv
 import Helpers
 
+
+#TODO: rochtiges Logging statt prints
 Vault = sv
 Vault.initialize(Helpers.n)
 sessionIds = []
@@ -25,7 +27,8 @@ try:
     sessionIds.append(message1[1])
 
     #Verify deviceID
-    if(message1[0]=="1337"): #TODO: check einbauen
+    if(message1[0]=="1337"): #TODO: check einbauen, device id nicht "hard coded", evtl irgendwo durch eine einfach Datei eine 
+        # Datenbank simulueren mit "registrierten" Geräten [Prio gering:]oder direkt ne SQLite integrieren; Prio gerung
         print(Helpers.now() + " The device is valid")
     else:
         print("Error, aborting, device invalid")
@@ -80,7 +83,7 @@ try:
         print(Helpers.now() + " Sent M4")
 
 
-except socket.error as e:
+except socket.error as e:   # TODO: richtiges Error Handling, feiner
     print(f"Send M4 failed: {e}")
 
 finally:
