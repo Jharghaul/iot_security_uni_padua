@@ -8,17 +8,9 @@ from Crypto.Cipher import AES
 class AESCipher(object):
     def __init__(self, key):
         self.bs = AES.block_size
-        
-        if(type(key)==type("Hello")):
-            self.key = hashlib.sha256(key.encode()).digest()
-        else:
-            self.key = key
+        self.key = key
         print("AESCIpherkey: ", self.key)
-        
-        print("key(hello) len: ", len(hashlib.sha256("Hello".encode()).digest()), "\n", hashlib.sha256("Hello".encode()).digest())
-        print(key)
         print("len(key): ", len(key))
-        #self.key = hashlib.sha256("Hello".encode()).digest() # FIXME delete line
         
 
     def encrypt(self, raw):

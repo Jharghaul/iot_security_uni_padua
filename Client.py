@@ -15,7 +15,7 @@ SessionId = 42
 
 #SecureVault initialization = Key exchange
 Vault = sv
-Vault.initialize(Helpers.n)
+Vault.initialize()
 
 try:
     #Send M1
@@ -51,8 +51,8 @@ try:
 
     #Send M3 to server
     #TODO: M3 = Enc(k1, r1||t1||{C2,r2})
-    nudelholz = r1_received + "||" +str(t1)+"||"+"{"+str(C2) + "," + str(r2) + "}" # TODO? Make a set of C2, r2
-    M3 = Helpers.encrypt(k1, nudelholz)
+    message3 = r1_received + "||" +str(t1)+"||"+"{"+str(C2) + "," + str(r2) + "}" # TODO? Make a set of C2, r2
+    M3 = Helpers.encrypt(k1, message3)
     client_socket.sendto(M3, server_address)
     print(Helpers.now() + " M3 sent")  
   
@@ -65,7 +65,7 @@ try:
     for i in C2:
         k2 = Helpers.xor_bytes(k2, Vault.getKey(i))
 
-    print("This is m4: ", message4)
+    print("This is M4: ", message4)
     decrypted = Helpers.decrypt(k2, message4)
     #TODO: decrypt with k2 XOR t1 -> steht r2 drin?
     print("Decrypted: \n", decrypted)
@@ -76,9 +76,9 @@ try:
         print("r2 check failed ")
 
 
-
 except socket.error as e:   # TODO: feineres Error Handling
         print(f"Something failed: {e}")
+        
 finally:
     # Change keys in vault and close the socket
     Vault.changeKeys("irgendwas") #TODO: richtige Message reinschreiben
