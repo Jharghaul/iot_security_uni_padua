@@ -10,7 +10,6 @@ class AESCipher(object):
         self.bs = AES.block_size
         self.key = key
         
-
     def encrypt(self, raw):
         raw = self._pad(raw)
         iv = Random.new().read(AES.block_size)

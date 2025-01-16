@@ -21,9 +21,8 @@ key_length_bits = digestMode().digest_size * 8
 
 # initializes the secure vault by providing the number of keys that should be stored, as well as optionally the digestmode.
 # generates all keys by hashing the master key (and other keys if # keys > 5)
-def initialize(number=n, challengeSize=p, digestmode=hashlib.sha256):
+def initialize(number=n, challengeSize=p):
     
-    digestMode = digestmode
     p = challengeSize
 
     for i in range(number):
@@ -62,5 +61,3 @@ def getP():
 def getN():
     return n
        
-
-        

@@ -9,9 +9,11 @@ Vault = sv
 Vault.initialize()
 sessionIds = []
 
+config = Helpers.load_config()
+
 # Configure logging
 logging.basicConfig(
-    level=logging.DEBUG,  # Set the log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    level=config['logging']['level'],  # Set the log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler()]  # Log to the console
 )
@@ -20,13 +22,14 @@ logger = logging.getLogger(__name__)
 
 #Server setup
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server_socket.bind(Helpers.server_address)
+server_address = (config['server']['host'], config['server']['port'])
+server_socket.bind(server_address)
 
-logger.info(f"Server is listening on port {Helpers.server_address[1]} ...")
+logger.info(f"Server is listening on port {config['server']['port']} ...")
 
 try:
     #Receive M1 from client
-    data, client_address = server_socket.recvfrom(Helpers.buffer_size)
+    data, client_address = server_socket.recvfrom(config['globalVariables']['buffersize'])
     message1 = data.decode()
     logger.info("Received M1")
     message1 = message1.split("||")
@@ -41,7 +44,7 @@ try:
         #TODO: Error werfen
         
     #Generate a random number and the challenge
-    r1 = random.randint(0, Helpers.randmax)
+    r1 = random.randint(0, config['globalVariables']['randmax'])
     C1 = Helpers.generateChallenge()
 
     # Generate key k1 from the keys in the challenge    
@@ -55,7 +58,7 @@ try:
     server_socket.sendto(M2.encode(), client_address)
 
     #Receive M3 from client
-    data, client_address = server_socket.recvfrom(Helpers.buffer_size)
+    data, client_address = server_socket.recvfrom(config['globalVariables']['buffersize'])
     message3 = data.decode()
     logger.info("Received M3")
     message3 = Helpers.decrypt(k1, message3)
@@ -79,7 +82,7 @@ try:
         k2 = bytes(Vault.key_length_bits) 
         for i in C2:
             k2 = Helpers.xor_bytes(k2, Vault.getKey(i))
-        t2 = random.randint(0, Helpers.randmax) # TODO move to helper?
+        t2 = random.randint(0, config['globalVariables']['randmax']) # TODO move to helper?
 
 
         # Enc(k2^t1, r2||t2)
