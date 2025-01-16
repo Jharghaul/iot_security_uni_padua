@@ -4,8 +4,8 @@ import AESCipher
 import SecureVault
 
 #Global variables
-n = SecureVault.getN() # size of key vault == number of keys K[0] ... K[n-1] # TODO make them initizialable
-p = SecureVault.getP()  # size of challenge, *p<n* # TODO make them initizialable
+n = SecureVault.getN() # size of key vault == number of keys K[0] ... K[n-1]
+p = SecureVault.getP()  # size of challenge, *p<n*
 randmax = int(1e10)
 buffer_size = 1024*1024
 server_address = ('localhost', 12346) #address of the server

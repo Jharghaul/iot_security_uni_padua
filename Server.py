@@ -4,10 +4,8 @@ import random
 import SecureVault as sv
 import Helpers
 
-
-#TODO: rochtiges Logging statt prints
 Vault = sv
-Vault.initialize(Helpers.n)
+Vault.initialize()
 sessionIds = []
 
 #Server setup
@@ -15,8 +13,8 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_socket.bind(Helpers.server_address)
 
 
-print("Server is listening on port 12346...")
-# Maybe we want to use https://github.com/twisted/twisted for easier communication
+
+print("Server is listening on port", Helpers.server_address[1], "...")
 
 try:
     #Receive M1 from client
@@ -28,7 +26,7 @@ try:
 
     #Verify deviceID
     if(message1[0]=="1337"): #TODO: check einbauen, device id nicht "hard coded", evtl irgendwo durch eine einfach Datei eine 
-        # Datenbank simulueren mit "registrierten" Geräten [Prio gering:]oder direkt ne SQLite integrieren; Prio gerung
+        # Datenbank simulueren mit "registrierten" Geräten [Prio gering:]oder direkt ne SQLite integrieren; Prio gering
         print(Helpers.now() + " The device is valid")
     else:
         print("Error, aborting, device invalid")
@@ -59,8 +57,8 @@ try:
     
     #Verify the IoT devices response
     if(int(message3[0])!=r1): # checks if k1 and r1 are correct
-        print("Captain, Captain, we need to aborrrt the mission!") # TODO be more serious
-        print("sollte nicht passieren") #TODO: Verbindung mit Client schließen
+        print("not correct r1") #TODO: Error werfen
+        
     else:    
         #Send M4 back to client
         #M3 = Enc(k1, r1||t1||{C2,r2})
@@ -77,7 +75,7 @@ try:
         t2 = random.randint(0, Helpers.randmax) # TODO move to helper?
 
 
-        # TODO Enc(k2^t1, r2||t2)
+        # Enc(k2^t1, r2||t2)
         M4 = Helpers.encrypt(Helpers.xor_bytes(k2,bytes(t1)), str(r2) + "||" + str(t2))
         server_socket.sendto(M4, client_address)
         print(Helpers.now() + " Sent M4")
