@@ -1,5 +1,4 @@
 import random
-import datetime
 import AESCipher
 import json
 
@@ -40,5 +39,3 @@ def decrypt(key, message):
 def randInt():
     config = load_config()
     return random.randint(0, config['globalVariables']['randmax'])
-
-

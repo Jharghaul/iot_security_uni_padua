@@ -34,10 +34,10 @@ try:
     logger.info(" M1 sent")  
             
     # Receive M2 from server
-    data, addr = client_socket.recvfrom(config['globalVariables']['buffersize'])
+    M2, addr = client_socket.recvfrom(config['globalVariables']['buffersize'])
     logger.info(" M2 received")
     
-    data = data.decode()[1:-1].split("||") # remove { } and split
+    data = M2.decode()[1:-1].split("||") # remove { } and split
     tmp = data[0]
     tmp = tmp[1: -1].split(",")
     C1_received = []
@@ -62,39 +62,42 @@ try:
     r2 = Helpers.randInt()
 
     #Send M3 to server
-    #TODO: M3 = Enc(k1, r1||t1||{C2,r2})
-    message3 = r1_received + "||" +str(t1)+"||"+"{"+str(C2) + "," + str(r2) + "}" # TODO? Make a set of C2, r2
-    M3 = Helpers.encrypt(k1, message3)
-    client_socket.sendto(M3, server_address)
+    #M3 = Enc(k1, r1||t1||{C2,r2})
+    M3 = r1_received + "||" +str(t1)+"||"+"{"+str(C2) + "," + str(r2) + "}" # TODO? Make a set of C2, r2
+    message3 = Helpers.encrypt(k1, M3)
+    client_socket.sendto(message3, server_address)
     logger.info("M3 sent")  
   
     # Receive M4 from server
     data, addr = client_socket.recvfrom(config['globalVariables']['buffersize'])
-    message4= data.decode()
+    M4 = data.decode()
     logger.info("M4 received")
 
     k2 = bytes(Vault.key_length_bits) 
     for i in C2:
         k2 = Helpers.xor_bytes(k2, Vault.getKey(i))
 
-    logger.debug(f"This is M4: {message4}")
-    decrypted = Helpers.decrypt(k2, message4)
-    #TODO: decrypt with k2 XOR t1 -> steht r2 drin?
-    logger.debug(f"Decrypted: {decrypted}")
+    logger.debug(f"This is M4: {M4}")
+    M4 = Helpers.decrypt(k2, M4)
+    logger.debug(f"Decrypted: {M4}")
 
-    if(decrypted.split("||")[0]==str(r2)): #r2 in M4
+    message4 = M4.split("||")
+    if(message4[0]==str(r2)): #r2 in M4
         logger.debug("r2 check succeded")
     else:
         logger.error("r2 check failed ")
-        #TODO: error werfen
+
+    # compute session key t
+    t = t1^int(message4[1])
+
+    # Change keys in vault and close the socket
+    Vault.changeKeys(M1+M2+M3+M4)
 
 
 except socket.error as e:   # TODO: feineres Error Handling
         logger.error(f"Something failed: {e}")
         
 finally:
-    # Change keys in vault and close the socket
-    Vault.changeKeys("irgendwas") #TODO: richtige Message reinschreiben
 
     client_socket.close()
     logger.info("Client Socket was closed")

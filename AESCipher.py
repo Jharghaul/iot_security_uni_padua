@@ -1,5 +1,4 @@
 import base64
-import hashlib
 from Crypto import Random # pip install --upgrade pycryptodome 
 from Crypto.Cipher import AES
 

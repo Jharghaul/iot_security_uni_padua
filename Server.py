@@ -28,9 +28,9 @@ logger.info(f"Server is listening on port {config['server']['port']} ...")
 try:
     #Receive M1 from client
     data, client_address = server_socket.recvfrom(config['globalVariables']['buffersize'])
-    message1 = data.decode()
+    M1 = data.decode()
     logger.info("Received M1")
-    message1 = message1.split("||")
+    message1 = M1.split("||")
     sessionIds.append(message1[1])
 
     #Verify deviceID
@@ -57,15 +57,14 @@ try:
 
     #Receive M3 from client
     data, client_address = server_socket.recvfrom(config['globalVariables']['buffersize'])
-    message3 = data.decode()
+    M3 = data.decode()
     logger.info("Received M3")
-    message3 = Helpers.decrypt(k1, message3)
-    message3 = message3.split("||")
+    M3 = Helpers.decrypt(k1,M3)
+    message3 = M3.split("||")
     
     #Verify the IoT devices response
     if(int(message3[0])!=r1): # checks if k1 and r1 are correct
-        logger.error("not correct r1") 
-        #TODO: Error werfen
+        logger.error("not correct r1.")
         
     else:    
         #Send M4 back to client
@@ -84,15 +83,22 @@ try:
 
 
         # Enc(k2^t1, r2||t2)
-        M4 = Helpers.encrypt(Helpers.xor_bytes(k2,bytes(t1)), str(r2) + "||" + str(t2))
-        server_socket.sendto(M4, client_address)
+        M4 = str(r2) + "||" + str(t2)
+        message4 = Helpers.encrypt(Helpers.xor_bytes(k2,bytes(t1)), M4)
+        server_socket.sendto(message4, client_address)
         logger.info("Sent M4")
 
+        # compute session key t
+        t = t1^t2
+        
+        # Change keys in vault and close the socket
+        Vault.changeKeys(M1+M2+M3+M4)
 
 except socket.error as e:   # TODO: richtiges Error Handling, feiner
     logger.error(f"Send M4 failed: {e}")
 
 finally:
+
     # Close the socket
     server_socket.close()
     logger.info("Server Socket was closed")
