@@ -1,16 +1,14 @@
-
-
 import base64
 import hashlib
 from Crypto import Random # pip install --upgrade pycryptodome 
 from Crypto.Cipher import AES
 
+
 class AESCipher(object):
+    
     def __init__(self, key):
         self.bs = AES.block_size
         self.key = key
-        print("AESCIpherkey: ", self.key)
-        print("len(key): ", len(key))
         
 
     def encrypt(self, raw):
