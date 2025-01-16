@@ -19,7 +19,7 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = (config['server']['host'], config['server']['port'])
 
 #IOT device settings
-DeviceId = "123abc"
+DeviceId = "123test" # "123abcd"
 SessionId = 42
 buffersize = 1048579
 
