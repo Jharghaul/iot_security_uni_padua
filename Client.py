@@ -3,13 +3,12 @@ import socket
 import Helpers
 import SecureVault as sv
 
-
 config = Helpers.load_config()
 
 # Configure logging
 logging.basicConfig(
     level=config['logging']['level'],  # Set the log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler()]  # Log to the console
 )
 
@@ -20,8 +19,10 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = (config['server']['host'], config['server']['port'])
 
 #IOT device settings
-DeviceId = "123abcd"
+DeviceId = "123abc"
 SessionId = 42
+buffersize = 1048579
+
 
 #SecureVault initialization = Key exchange
 Vault = sv
@@ -34,10 +35,11 @@ try:
     logger.info("M1 sent")  
             
     # Receive M2 from server
-    M2, addr = client_socket.recvfrom(config['globalVariables']['buffersize'])
+    M2, addr = client_socket.recvfrom(buffersize)
     logger.info("M2 received")
     
-    data = M2.decode()[1:-1].split("||") # remove { } and split
+    M2 = M2.decode()
+    data = M2[1:-1].split("||") # remove { } and split
     tmp = data[0]
     tmp = tmp[1: -1].split(",")
     C1_received = []
@@ -69,7 +71,7 @@ try:
     logger.info("M3 sent")  
   
     # Receive M4 from server
-    data, addr = client_socket.recvfrom(config['globalVariables']['buffersize'])
+    data, addr = client_socket.recvfrom(buffersize)
     M4 = data.decode()
     logger.info("M4 received")
 
