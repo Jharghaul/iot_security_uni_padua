@@ -20,7 +20,7 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = (config['server']['host'], config['server']['port'])
 
 #IOT device settings
-DeviceId = 1337
+DeviceId = "123abcd"
 SessionId = 42
 
 #SecureVault initialization = Key exchange
@@ -31,11 +31,11 @@ try:
     #Send M1
     M1 = str(DeviceId) +"||"+  str(SessionId)
     client_socket.sendto(M1.encode(), server_address)
-    logger.info(" M1 sent")  
+    logger.info("M1 sent")  
             
     # Receive M2 from server
     M2, addr = client_socket.recvfrom(config['globalVariables']['buffersize'])
-    logger.info(" M2 received")
+    logger.info("M2 received")
     
     data = M2.decode()[1:-1].split("||") # remove { } and split
     tmp = data[0]

@@ -1,5 +1,6 @@
 import logging
 import socket
+import Database
 import Helpers
 import SecureVault as sv
 
@@ -11,19 +12,22 @@ config = Helpers.load_config()
 
 # Configure logging
 logging.basicConfig(
-    level=config['logging']['level'],  # Set the log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    level=config['logging']['level'],
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler()]  # Log to the console
 )
 
 logger = logging.getLogger(__name__)
 
-#Server setup
+# Server setup
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = (config['server']['host'], config['server']['port'])
 server_socket.bind(server_address)
 
 logger.info(f"Server is listening on port {config['server']['port']} ...")
+
+# Database initialization
+Database.create_database()
 
 try:
     #Receive M1 from client
@@ -34,12 +38,11 @@ try:
     sessionIds.append(message1[1])
 
     #Verify deviceID
-    if(message1[0]=="1337"): #TODO: check einbauen, device id nicht "hard coded", evtl irgendwo durch eine einfach Datei eine 
-        # Datenbank simulieren mit "registrierten" Geräten [Prio gering:]oder direkt ne SQLite integrieren; Prio gering
+    if(Database.is_valid_device_id(message1[0])):
         logger.debug("The device is valid")
     else:
         logger.error("Error, aborting, device invalid")
-        #TODO: Error werfen
+        raise ValueError("Invalid device ID")
         
     #Generate a random number r1 and the challenge C1
     r1 = Helpers.randInt()
@@ -93,11 +96,11 @@ try:
         # Change keys in vault and close the socket
         Vault.changeKeys(M1+M2+M3+M4)
 
-except socket.error as e:   # TODO: richtiges Error Handling, feiner
-    logger.error(f"Send M4 failed: {e}")
+except Exception as e:   # TODO: richtiges Error Handling, feiner
+    logger.error(f"Exchange failed: {e}")
 
 finally:
-
     # Close the socket
+    #TODO: shutdown? mit nachticht/ereignis an client, dass verbindung zu gemacht wird
     server_socket.close()
     logger.info("Server Socket was closed")

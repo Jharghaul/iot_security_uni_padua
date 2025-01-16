@@ -1,11 +1,13 @@
 import random
 import AESCipher
 import json
+import pathlib
 
 
 # get data from config.json
 def load_config():
-    with open('config.json', 'r') as f:
+    current_directory = pathlib.Path(__file__).parent.resolve()
+    with open(str(current_directory) + '/config.json', 'r') as f:
         config = json.load(f)
     return config
 
