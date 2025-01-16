@@ -3,12 +3,6 @@ import datetime
 import AESCipher
 import json
 
-#Global variables
-#n = 1000    # size of key vault == number of keys K[0] ... K[n-1]   #TODO
-#p = 200     # size of challenge, *p<n*                              #TODO
-#randmax = int(1e10)
-#buffer_size = 1024*1024
-#server_address = ('localhost', 12346) #address of the server
 
 # get data from config.json
 def load_config():
@@ -40,5 +34,11 @@ def encrypt(key, message):
 def decrypt(key, message):
     aesInstance = AESCipher.AESCipher(key)
     return aesInstance.decrypt(message)
+
+
+# generate random int between 0 and randmax
+def randInt():
+    config = load_config()
+    return random.randint(0, config['globalVariables']['randmax'])
 
 

@@ -1,9 +1,7 @@
-import socket
-import datetime
-import random
-import SecureVault as sv
-import Helpers
 import logging
+import socket
+import Helpers
+import SecureVault as sv
 
 Vault = sv
 Vault.initialize()
@@ -43,8 +41,8 @@ try:
         logger.error("Error, aborting, device invalid")
         #TODO: Error werfen
         
-    #Generate a random number and the challenge
-    r1 = random.randint(0, config['globalVariables']['randmax'])
+    #Generate a random number r1 and the challenge C1
+    r1 = Helpers.randInt()
     C1 = Helpers.generateChallenge()
 
     # Generate key k1 from the keys in the challenge    
@@ -82,7 +80,7 @@ try:
         k2 = bytes(Vault.key_length_bits) 
         for i in C2:
             k2 = Helpers.xor_bytes(k2, Vault.getKey(i))
-        t2 = random.randint(0, config['globalVariables']['randmax']) # TODO move to helper?
+        t2 = Helpers.randInt()
 
 
         # Enc(k2^t1, r2||t2)
