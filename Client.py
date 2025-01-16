@@ -63,7 +63,7 @@ try:
 
     #Send M3 to server
     #M3 = Enc(k1, r1||t1||{C2,r2})
-    M3 = r1_received + "||" +str(t1)+"||"+"{"+str(C2) + "," + str(r2) + "}" # TODO? Make a set of C2, r2
+    M3 = r1_received + "||" +str(t1)+"||"+"{"+str(C2) + "," + str(r2) + "}"
     message3 = Helpers.encrypt(k1, M3)
     client_socket.sendto(message3, server_address)
     logger.info("M3 sent")  

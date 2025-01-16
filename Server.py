@@ -51,7 +51,7 @@ try:
         k1 = Helpers.xor_bytes(k1, Vault.getKey(i))
 
     #Send M2 back to client
-    M2 = "{" + str(C1) + "||" + str(r1) + "}"    #TODO?: Tupel
+    M2 = "{" + str(C1) + "||" + str(r1) + "}"
     logger.info("Sent M2")
     server_socket.sendto(M2.encode(), client_address)
 
@@ -68,7 +68,6 @@ try:
         
     else:    
         #Send M4 back to client
-        #M3 = Enc(k1, r1||t1||{C2,r2})
         t1 = int(message3[1])
         message3 = message3[2][1:-1] # take away { }
         r2 = message3.split(",")[-1]
@@ -90,7 +89,7 @@ try:
 
         # compute session key t
         t = t1^t2
-        
+
         # Change keys in vault and close the socket
         Vault.changeKeys(M1+M2+M3+M4)
 
