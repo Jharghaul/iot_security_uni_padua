@@ -6,7 +6,6 @@ import SecureVault as sv
 
 Vault = sv
 Vault.initialize()
-sessionIds = []
 
 config = Helpers.load_config()
 
@@ -53,7 +52,6 @@ def handle_client(server_socket):
         M1 = data.decode()
         logger.info(f"{client_address}: Received M1")
         message1 = M1.split("||")
-        sessionIds.append(message1[1])
 
         #Verify deviceID
         if(Database.is_valid_device_id(message1[0])):
