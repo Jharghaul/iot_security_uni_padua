@@ -17,9 +17,9 @@ def generateChallenge():
     n = config['globalVariables']['n']
     p = config['globalVariables']['p']
     
-    challengeSet = []
+    challengeSet = set()
     while len(challengeSet)<p:
-        challengeSet.append(random.randint(0,n-1))
+        challengeSet.add(random.randint(0,n-1))
     return challengeSet
 
 # xors two bytes b1 and b2
