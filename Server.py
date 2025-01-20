@@ -22,10 +22,8 @@ logger = logging.getLogger(__name__)
 def start_server():
     # Server setup
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # permit reuse of the port
     server_address = (config['server']['host'], config['server']['port'])
     server_socket.bind(server_address)
-    #server_socket.listen(5)     # permits just 5 connections at the same time and queues the others
 
     logger.info(f"Server is listening on port {config['server']['port']} ...")
 
@@ -108,14 +106,17 @@ def handle_client(server_socket):
             server_socket.sendto(message4, client_address)
             logger.info(f"{client_address}: Sent M4")
 
-            # compute session key t # TODO: was ist damit? erklären oder noch was damit machen
+            # compute session key t
+            # TESTING use for further communcation
             t = t1^t2
 
             # Change keys in vault and close the socket
-            # Vault.changeKeys(M1+M2+M3+M4) TODO: wie damit umgehen bei mehreren Client; 
-            # Felix Idee: Hier Prove of Concept deklarieren und sagen dass man dafür in "further works" eine Lösung macht
+            Vault.changeKeys(M1+M2+M3+M4)
     except Exception as e:
         logger.error(f"Error while handling client {client_address}: {e}")
+        error = f"error: {e}"
+        server_socket.sendto(error.encode(), client_address)
+        
         
         
 if __name__ == "__main__":

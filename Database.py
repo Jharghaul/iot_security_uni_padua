@@ -21,7 +21,7 @@ def create_database():
             )
         ''')
         
-        # for testing purposes, remove
+        # TESTING for testing purposes, 
         cursor.execute('INSERT or IGNORE INTO devices (device_id, device_type) VALUES (?, ?)', ("123test", "test sensor"))
 
         connection.commit()
@@ -44,8 +44,7 @@ def is_valid_device_id(device_id):
     connection.close()
     return result is not None       # true, if deviceID exists in DB
 
-#TODO: die methode wird nicht genutzt, aber finde sie ok drin zu lassen; Aber können sie auch löschen
-# adds a new deviceId to the database
+# TESTING adds a new deviceId to the database
 #def add_device_id(device_id, device_type):
 #    connection = sqlite3.connect('iot_devices.db')
 #    cursor = connection.cursor()

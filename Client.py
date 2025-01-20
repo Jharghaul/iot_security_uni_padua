@@ -1,4 +1,5 @@
 import logging
+import random       # TESTING not for productive use
 import socket
 import Helpers
 import SecureVault as sv
@@ -18,18 +19,22 @@ logger = logging.getLogger(__name__)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = (config['server']['host'], config['server']['port'])
 
-#IOT device settings
-DeviceId = "123test" # "123abcd"
-SessionId = 42
+# IOT device settings
+# TESTING not for productive use, prove of concept, implement here how you get the DeviceID
+device_ids = ["123test", "456sensor", "789iot", "112device"]  
+DeviceId = random.choice(device_ids)
+print(DeviceId)
+                      
+SessionId = 42  #TODO: hier hard coded oder wie DeviceID behandeln?
 buffersize = 1048579
 
-
-#SecureVault initialization = Key exchange
+# SecureVault initialization = Key exchange
 Vault = sv
 Vault.initialize()
 
+
 try:
-    #Send M1
+    # Send M1
     M1 = str(DeviceId) +"||"+  str(SessionId)
     client_socket.sendto(M1.encode(), server_address)
     logger.info("M1 sent")  
@@ -39,6 +44,11 @@ try:
     logger.info("M2 received")
     
     M2 = M2.decode()
+    
+    # Check if M2 is a error message
+    if M2.startswith("error"):
+        raise Exception(M2)
+    
     data = M2[1:-1].split("||") # remove { } and split
     tmp = data[0]
     tmp = tmp[1: -1].split(",")
@@ -46,7 +56,7 @@ try:
     for i in tmp:
         C1_received.append(int(i))
     
-    #Check if r1 has the right value
+    # Check if r1 has the right value   #TODO ?
     r1_received = data[1]
 
     # Generate key k1 from the keys in the challenge    
@@ -74,6 +84,10 @@ try:
     data, addr = client_socket.recvfrom(buffersize)
     M4 = data.decode()
     logger.info("M4 received")
+    
+    # check if M4 is a error message
+    if M4.startswith("error"):
+        raise Exception(M4)
 
     k2 = bytes(Vault.key_length_bits) 
     for i in C2:
@@ -90,14 +104,15 @@ try:
         logger.error("r2 check failed ")
 
     # compute session key t
+    # TESTING use for further communcation
     t = t1^int(message4[1])
 
     # Change keys in vault and close the socket
     Vault.changeKeys(M1+M2+M3+M4)
 
 
-except socket.error as e:   # TODO: feineres Error Handling
-        logger.error(f"Something failed: {e}")
+except Exception as e:   # TODO: feineres Error Handling
+    logger.error(e)
         
 finally:
 
