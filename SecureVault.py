@@ -13,6 +13,7 @@ keys = []
 digestMode = hashlib.sha256
 key_length_bits = digestMode().digest_size * 8
 
+
 config = Helpers.load_config()
 
 # initializes the secure vault by providing the number of keys that should be stored, as well as optionally the digestmode.

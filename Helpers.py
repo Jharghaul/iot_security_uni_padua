@@ -19,7 +19,13 @@ def generateChallenge():
     
     challengeSet = set()
     while len(challengeSet)<p:
-        challengeSet.add(random.randint(0,n-1))
+        index = random.randint(0,n-1)
+        
+        # make sure that distinct values are chosen
+        while index in challengeSet:
+            index = random.randint(0,n-1)
+            
+        challengeSet.add(index)
     return challengeSet
 
 # xors two bytes b1 and b2
@@ -35,7 +41,6 @@ def encrypt(key, message):
 def decrypt(key, message):
     aesInstance = AESCipher.AESCipher(key)
     return aesInstance.decrypt(message)
-
 
 # generate random int between 0 and randmax
 def randInt():
