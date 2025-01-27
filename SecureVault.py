@@ -42,6 +42,15 @@ def getKey(index):
     
     return None
 
+def setKeys(stored_keys):
+    if(stored_keys == None or stored_keys == []):
+        return
+    global keys
+    
+    for i in range(len(stored_keys)):
+        keys[i] = stored_keys[i]
+    
+
 # Each key gets xor with the hmac(key, message)
 def changeKeys(message):
     
@@ -49,5 +58,6 @@ def changeKeys(message):
         digest = hmac.new(keys[i], message.encode("utf-8"), digestMode).digest()
         
         keys[i] = Helpers.xor_bytes(keys[i], digest)
+        return keys
 
        

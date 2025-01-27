@@ -3,6 +3,7 @@ import random       # TESTING not for productive use
 import socket
 import Helpers
 import SecureVault as sv
+import Database
 
 config = Helpers.load_config()
 
@@ -22,7 +23,8 @@ server_address = (config['server']['host'], config['server']['port'])
 # IOT device settings
 # TESTING not for productive use, prove of concept, implement here how you get the DeviceID
 device_ids = ["123test", "456sensor", "789iot", "112device"]  
-DeviceId = random.choice(device_ids)
+#DeviceId = random.choice(device_ids)    # FIXME TODO undo comment and delete next line so the id is chosen at random again
+DeviceId = device_ids[0]
 print(DeviceId)
                       
 SessionId = random.randint(1, 1000) # TESTING implement here how you get the SessionID
@@ -60,6 +62,8 @@ try:
     # Check if r1 has the right value   #TODO ?
     r1_received = data[1]
 
+
+    Vault.setKeys(Database.get_vault_of(DeviceId)) # TODO FIXME do not access Database (also delete Line 6 "import Database") but write it into some file 
     # Generate encryption key k1 from the keys in the challenge    
     k1 = bytes(Vault.key_length_bits) 
     for i in C1_received:

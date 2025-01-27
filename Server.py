@@ -50,10 +50,12 @@ def handle_client(server_socket):
         M1 = data.decode()
         logger.info(f"{client_address}: Received M1")
         message1 = M1.split("||")
+        deviceID = message1[0]
 
         # Verify deviceID
-        if(Database.is_valid_device_id(message1[0])):
+        if(Database.is_valid_device_id(deviceID)):
             logger.debug(f"{client_address}: The device is valid")
+            Vault.setKeys(Database.get_vault_of(deviceID))
         else:
             logger.error(f"{client_address}: Error, aborting, device invalid")
             raise ValueError("Invalid device ID")
@@ -120,8 +122,10 @@ def handle_client(server_socket):
             t = t1^t2
 
             # Change keys in vault and close the socket
-            #messages = M1+M2+M3+message4
-            #Vault.changeKeys(messages)     # TESTING implement a mechanism to save the new vault keys
+            messages = M1+M2+M3+message4
+            new_keys = Vault.changeKeys(messages)     # TESTING implement a mechanism to save the new vault keys
+            logger.info("Changed keys")
+            Database.store_vault_of(deviceID, new_keys)
             
     except Exception as e:
         logger.error(f"Error while handling client {client_address}: {e}")
