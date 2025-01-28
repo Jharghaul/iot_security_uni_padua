@@ -23,8 +23,7 @@ server_address = (config['server']['host'], config['server']['port'])
 # IOT device settings
 # TESTING not for productive use, prove of concept, implement here how you get the DeviceID
 device_ids = ["123test", "456sensor", "789iot", "112device"]  
-#DeviceId = random.choice(device_ids)    # FIXME TODO undo comment and delete next line so the id is chosen at random again
-DeviceId = device_ids[0]
+DeviceId = random.choice(device_ids)
 print(DeviceId)
                       
 SessionId = random.randint(1, 1000) # TESTING implement here how you get the SessionID

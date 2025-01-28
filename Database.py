@@ -23,11 +23,12 @@ def create_database():
 
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS vault_keys (
-                id INTEGER,
-                device_id TEXT,
-                vault_key VARBINARY,
-                PRIMARY KEY (id)
-                FOREIGN KEY (device_id) REFERENCES devices(device_id));
+                order_id INTEGER,                     -- order ID
+                device_id TEXT,                       -- device ID
+                vault_key VARBINARY,                  -- vault key
+                UNIQUE(device_id, vault_key),         -- device_id and vault_key must be unique
+                PRIMARY KEY (order_id, device_id)     -- combination of order_id and device_id is the primary key
+            )
         ''')
         
         
@@ -63,22 +64,22 @@ def add_device_id(device_id, device_type):
         cursor.execute('INSERT INTO devices (device_id, device_type) VALUES (?, ?)', (device_id, device_type))
         connection.commit()
     except sqlite3.IntegrityError:
-        print(f"Device ID {device_id} already exists.")
+        print(f"Device ID {device_id} already exists.") #TODO: exception an aufrufer geben
 
     connection.close()
 
-# Retreives an array of keys that are the Secure Vault connected to the device_id
+# Retrieves an array of keys that are the Secure Vault connected to the device_id
 def get_vault_of(device_id):
     config = Helpers.load_config()
     connection = sqlite3.connect(config['database']['name']) 
     cursor = connection.cursor()
-    cursor.execute('SELECT * FROM vault_keys WHERE device_id = ? ORDER BY id ASC', (device_id,))
+    cursor.execute('SELECT vault_key FROM vault_keys WHERE device_id = ? ORDER BY order_id ASC', (device_id,))
     keys = []
 
     # Retreive keys one by one to ensure the correct order
     single_key = cursor.fetchone()
     while(single_key != None):
-        keys.append(single_key[2])
+        keys.append(single_key[0])
         single_key = cursor.fetchone()      
 
     connection.close()
@@ -91,7 +92,7 @@ def store_vault_of(device_id, new_vault):
     cursor = connection.cursor()
 
     for i in range(len(new_vault)):
-        cursor.execute('INSERT OR REPLACE INTO vault_keys (id, device_id, vault_key) VALUES (?,?,?)', (i, device_id, new_vault[i],))    
+        cursor.execute('INSERT OR REPLACE INTO vault_keys (order_id, device_id, vault_key) VALUES (?,?,?)', (i, device_id, new_vault[i],))    
 
     connection.commit()
     connection.close()

@@ -54,8 +54,12 @@ def handle_client(server_socket):
 
         # Verify deviceID
         if(Database.is_valid_device_id(deviceID)):
-            logger.debug(f"{client_address}: The device is valid")
-            Vault.setKeys(Database.get_vault_of(deviceID))
+            logger.info(f"{client_address}: The device is valid")
+            keys = Database.get_vault_of(deviceID)
+            logger.debug(f"{client_address}: keys are set")
+            Vault.setKeys(keys)
+            logger.debug(f"{client_address}: vault is set")
+            
         else:
             logger.error(f"{client_address}: Error, aborting, device invalid")
             raise ValueError("Invalid device ID")
@@ -63,19 +67,23 @@ def handle_client(server_socket):
         # Generate a random number r1 and the challenge C1
         r1 = Helpers.randInt()
         C1 = Helpers.generateChallenge()
-
+        logger.debug(f"{client_address}: C1 generated")
+        
         # Generate encryption key k1 from the keys in the challenge C1
         # IOTDevice does the same on it's side 
         k1 = bytes(Vault.key_length_bits)
         for i in C1:
             k1 = Helpers.xor_bytes(k1, Vault.getKey(i))
+            
+        logger.debug(f"{client_address}: k1 generated")
+        
 
         # Send M2 back to IOT device
         # M2 = { C1 || r1 }
         M2 = "{" + str(C1) + "||" + str(r1) + "}"
         logger.info(f"{client_address}: Sent M2")
         server_socket.sendto(M2.encode(), client_address)
-
+        
         # Receive M3 from IOT device
         data, client_address = server_socket.recvfrom(config['globalVariables']['buffersize'])
         M3 = data.decode()
