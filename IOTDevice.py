@@ -36,7 +36,7 @@ with open("keys.txt", "rb") as key_file:
    
     keys = []
     # Write keys to file
-    for i in n:
+    for i in range(n):
         keys[i] = key_file.read()
     Vault.setKeys(keys)
 
@@ -125,7 +125,7 @@ try:
     with open("keys.txt", "wb") as key_file:
    
         # Write keys to file
-        for i in n:
+        for i in range(n):
             key_file.write(Vault.getKey(i))
 
 except Exception as e:
