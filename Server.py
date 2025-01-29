@@ -33,8 +33,8 @@ def start_server():
         while True:
             handle_client(server_socket)
 
-    #except Exception as e:   
-     #   logger.error(f"Exchange failed: {e}")
+    except Exception as e:   
+       logger.error(f"Exchange failed: {e}")
 
     finally:
         # Close the socket
@@ -107,9 +107,9 @@ def handle_client(server_socket):
             # Read the random number r2 and the challenge C2 from M3
             r2 = message3.split(",")[-1]
             C2 = []
-            temp = message3[1:(message3.find(message3.split(",")[-1])-2)].split(",")    # split off r2 and the [ ], then split for the challenge
+            temp = message3[1:(message3.find(message3.split(",")[-1])-2)].split(",")    # Split off r2 and the [ ], then split for the challenge
             
-            for i in temp:  # values were transmitted as string and have to be turned back to int
+            for i in temp:  # Values were transmitted as string and have to be turned back to int
                 C2.append(int(i))   # TODO: wenn noch elan dafür da: hier try catch ValueError
 
             # Generate encryption key k2 from the keys in the challenge C2
@@ -137,12 +137,10 @@ def handle_client(server_socket):
             logger.info("Changed keys")
             Database.store_vault_of(deviceID, new_keys)
             
-    #except Exception as e:
-     #   logger.error(f"Error while handling client {client_address}: {e}")
-      #  error = f"error: {e}"       # sending the IOT device the exception message to inform about the server side error
-       # server_socket.sendto(error.encode(), client_address)
-    finally:
-        server_socket.sendto("error finally".encode(), client_address)
+    except Exception as e:
+       logger.error(f"Error while handling client {client_address}: {e}")
+        error = f"error: {e}"       # Sending the IOT device the exception message to inform about the server side error
+        server_socket.sendto(error.encode(), client_address)
 
 if __name__ == "__main__":
     start_server()

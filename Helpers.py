@@ -3,15 +3,14 @@ import AESCipher
 import json
 import pathlib
 
-
-# get data from config.json
+# Get data from config.json
 def load_config():
     current_directory = pathlib.Path(__file__).parent.resolve()
     with open(str(current_directory) + '/config.json', 'r') as f:
         config = json.load(f)
     return config
 
-# generate a challange
+# Generate a challenge
 def generateChallenge():
     config = load_config()
     n = config['globalVariables']['n']
@@ -21,7 +20,7 @@ def generateChallenge():
     while len(challengeSet)<p:
         index = random.randint(0,n-1)
         
-        # make sure that distinct values are chosen
+        # Make sure that distinct values are chosen
         while index in challengeSet:
             index = random.randint(0,n-1)
             
@@ -37,12 +36,12 @@ def encrypt(key, message):
     aesInstance = AESCipher.AESCipher(key)
     return aesInstance.encrypt(message)
 
-# AES encrypts a message under the given key
+# AES decrypts a message under the given key
 def decrypt(key, message):
     aesInstance = AESCipher.AESCipher(key)
     return aesInstance.decrypt(message)
 
-# generate random int between 0 and randmax
+# Generate random int between 0 and randmax
 def randInt():
     config = load_config()
     return random.randint(0, config['globalVariables']['randmax'])

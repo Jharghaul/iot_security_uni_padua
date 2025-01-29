@@ -5,7 +5,7 @@ import logging
 
 class SecureVault:
            
-    # initial randomness
+    # Initial randomness
     masterkeys = ["doagW31MNuBTnvbrlDikILQI08vEBhZyhIRI96pc4RcmEimFOjtfbvqrNQ1COlBmclqrUS9T62LhH26W7SCGoAjRfNUfNBjUqudXRpZkIuBdJWwRUVT1cJ419mhvTJqj1IilXxOpoyq3gfIlEqz6liZCgKeWujdlis316syZPIOfOHnBf7fKQhFWQabmpX4JjhUscifhFg12AxrtKE0ncqjZTpq3oPMCzpFrvQIcCjcinedRuoZdHTbTYiLlpGwBvYwi5zVTyBxbkABFT5JnRMJQ6EIlEYHAHn6bQ7HMjzCuX1sgleR63cieaqD5kTwOw5KmyfUj8U4BVRCqaCpdqP2eYMZZ6Pp2yv5F88CixRfldhQiWY9rywXegMenVit5653EU4shrYxplTomfZrqqkz5AAktUEFmEPq6t17hxOlpPIEKDm53VDWIXwMvXzoBEfuo5xwxiOJroymg2vekoVbRikKZm7uqX6fA8voyOcs67LVci3c5LNbb15XT8zBJ",
                 "9h6OkimozvXV0oq34IBxzer7PFKklUegEj5veAoAT1gfphfzDIABEZdZVWpV4X8qRZruHubdfWV4TRbgsSQoDOlAjlYfHfWBK7MHt7P9YitA7yuAgb1veFYVpU5ChTlpLNqTCnGYeugGJVJoLgrZpqy0eEctMQKqCwBs52p8dCMnRhBDEXPp4iOKJ4Nk4JYU6L3JgzOvmIDvhtgnMEIlc30q5w3qg5UBgTnjktvKrrIZxpn0N1UUEuOH8l91oBTUXoqLotuDEItJCH0Y5aWg8BUd8ZEtbRMbJkdvXVwTGb47DGhE3xE26s8Ipo32T9PboKQOnQCudA59ZLL8uPB9wqCbJsTQ6fJQ8udZ7q6l6EldNOyW2rjNFJCGBB7S8YkLZPbq5GUUeatSov2PpfcqBfW7ANxPvsJA0fB1Rs6kGAUpwK7KGqvU5Z2HqCld3hsQf83wbUb5BiPkoK6ajV5IUNG0AZ0tPEiC1ClsUe1TZyEGLDcKwbziat8jZkhyAbqv",
                 "NULnw18OjRw8c0d397CpqAGqF3JZunBsxqY6rkOlbKxrQpJuDgeKRVv4xaVJvxrC2stMqVaz1TDo0bQcvZIHilkNgYeODYa1dnVdCpVU1ew76t8AuKJh8SN7SAoKD1u6NshQohLu1LswAoEaTAgnJbm6PhB0cTIRwxjh87DLEPib0pzSM5H0cI8ds0gmxK8BQNSra5IX6Z56sC2Nk1T53gKmLN7InQNtROibqEvCCTTwjPSGadw3c2VQbe7WrCkbH1Xm13CzhsOJWqAfBAxXE5H2KTfYprAdIYABxZZyvPnrVwyk5kqzu1njseMyErr9nRRk0h2Lso8UpR9xhEuOXJISoeSPZFrQ4tKdCBxja1DCWtY5oSSjfRSnZ3Q4IaAfI464sNYy2Jt2vZamzPcDqvnKqNYKYxk4crzcp9hggTyCnXJDOAcDAEHtSwdrI74v1aTbAzA1vRZeogyp00cC85i3FIP4j3V6pXudQ3JKHleQ9kYRZ2XaxDjWT9kRvOX",
@@ -21,8 +21,8 @@ class SecureVault:
         
         self.config = Helpers.load_config()
 
-    # initializes the secure vault by providing the number of keys that should be stored, as well as optionally the digestmode.
-    # generates all keys by hashing the master key (and other keys if # keys > 5)
+    # Initializes the secure vault by providing the number of keys that should be stored, as well as optionally the digestmode.
+    # Generates all keys by hashing the master key (and other keys if # keys > 5)
     def initialize(self):
         n = self.config['globalVariables']['n']
 
@@ -44,7 +44,6 @@ class SecureVault:
         if index >= 0 & index < len(self.keys):
             return self.keys[index]
         
-        #return None
 
     def getKeys(self):
         return self.keys
@@ -54,8 +53,6 @@ class SecureVault:
             logger.error(f"Error retrieving keys from the database, no keys were retrieved")
             raise ValueError("Attempt to set keys with an empty array was caught")
         
-        print(stored_keys[1])
-        print(stored_keys[2])
         self.keys = stored_keys
                 
 

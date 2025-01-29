@@ -18,7 +18,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# these two have do be defined before the executing code
+# These two have do be defined before the executing code
 def read_keys_from_file(deviceID):
 
     keys = []
@@ -29,17 +29,11 @@ def read_keys_from_file(deviceID):
     # Read keys from file
         
         blob = key_file.read()
-        print("blob length: ",len(blob))
+        logger.debug("blob length: ",len(blob))
         for i in range(n):
             encodedKey = blob[i*32:(i+1)*32]
-            #encodedKey = encodedKey
             keys.append(encodedKey)
             
-            if i <= 3:
-                print("read file")
-                print(i, keys[i])
-    
-        #Vault.setKeys(keys)
     return keys
 
 
@@ -49,16 +43,8 @@ def write_keys_to_file(keys, deviceID):
    
         # Write keys to file
         for i in range(n):
-            #encodedKey = Vault.getKey(i).decode('utf-8')
             key_file.write(Vault.getKey(i))
-            #key_file.write("\n")
-            if i <= 3:
-                print(i, keys[i])
-                #print("type: ", type(keys[i]))
-
-
-
-
+           
 # Client socket setup
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = (config['server']['host'], config['server']['port'])
@@ -67,7 +53,7 @@ server_address = (config['server']['host'], config['server']['port'])
 # TESTING not for productive use, prove of concept, implement here how you get the DeviceID
 device_ids = ["123test", "456sensor"]#, "789iot", "112device"]  
 DeviceId = random.choice(device_ids)
-print(DeviceId)
+logger.debug(f"{DeviceId}")
                       
 SessionId = random.randint(1, n) # TESTING implement here how you get the SessionID
 buffersize = 1048579
@@ -75,14 +61,7 @@ buffersize = 1048579
 # SecureVault initialization = Key exchange
 Vault = sv.SecureVault()
 keys = read_keys_from_file(DeviceId)
-
-    
-print("setting keys")
 Vault.setKeys(keys)
-print(Vault.getKey(1))
-print(Vault.getKey(2))
-
-
 
 try:
     # Send M1
@@ -101,24 +80,22 @@ try:
         logger.error("M2 contained error message:")
         raise Exception(M2)
     
-    data = M2[1:-1].split("||") # remove { } and split
+    data = M2[1:-1].split("||") # Remove { } and split
     tmp = data[0]
     tmp = tmp[1: -1].split(",")
     C1_received = []
     for i in tmp:
         C1_received.append(int(i))
     
-    # retrieve r1 for the reply later
+    # Retrieve r1 for the reply later
     r1_received = data[1]
 
 
-    
     # Generate encryption key k1 from the keys in the challenge    
     k1 = bytes(Vault.key_length_bits) 
     logger.debug(f"k1 in IOT device: {k1}")
     logger.debug(f"vault(1) in IOT device: : {Vault.getKey(0)}")
     for i in C1_received:
-        #print("Type of Vault key: ", type(Vault.getKey(i)))
         k1 = Helpers.xor_bytes(k1, Vault.getKey(i))
         
     # Generate random number t1 and challenge C2    
@@ -144,7 +121,7 @@ try:
     M4 = data.decode()
     logger.info("M4 received")
     
-    # check if M4 is a error message
+    # Check if M4 is a error message
     if M4.startswith("error"):
         logger.error("M4 contained error message:")
         raise Exception(M4)
@@ -166,15 +143,16 @@ try:
 
     # compute session key t
     # TESTING use for further communcation
-    t = t1^int(message4[1])
+    t2 = message4[1]
+    t = t1^int(t2)
 
     # Change keys in vault and close the socket
     messages = M1+M2+message3+M4
     Vault.changeKeys(messages)     # TESTING implement a mechanism to save the new vault keys
     write_keys_to_file(Vault.getKeys(), DeviceId)
 
-#except Exception as e:
- #   logger.error(e)
+except Exception as e:
+    logger.error(e)
         
 finally:
     client_socket.close()

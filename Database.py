@@ -68,10 +68,10 @@ def add_device_id(device_id, device_type):
         cursor.execute('INSERT INTO devices (device_id, device_type) VALUES (?, ?)', (device_id, device_type))
         connection.commit()
         store_vault_of(device_id, Vault.getKeys())
-    except sqlite3.IntegrityError:
+    except sqlite3.IntegrityError as e:
         print(f"Device ID {device_id} already exists.") #TODO: exception an aufrufer geben
-
-    connection.close()
+    finally:
+        connection.close()
 
 # Retrieves an array of keys that are the Secure Vault connected to the device_id
 def get_vault_of(device_id):
