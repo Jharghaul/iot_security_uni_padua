@@ -13,6 +13,20 @@ print(ph)
 ph = ph[1:(ph.find(ph.split(",")[-1])-2)]
 print(ph)
 
+import SecureVault as sv
+vault = sv
+
+vault.initialize()
+
+keys = vault.getKeys()
+
+with open("keys.txt", "wb") as key_file:
+    for i in range(len(keys)):
+        key_file.write(vault.getKey(i))
+        if(vault.getKey(i) != keys[i]):
+            print("Interesting")
+
+
 # python C:\Users\grane\Documents\GitHub\iot_security_uni_padua\
 
 #print("AES.block_size", str(AES.block_size))
