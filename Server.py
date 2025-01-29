@@ -88,6 +88,8 @@ def handle_client(server_socket):
         data, client_address = server_socket.recvfrom(config['globalVariables']['buffersize'])
         M3 = data.decode()
         logger.info(f"{client_address}: Received M3")
+        logger.debug(f"k1 in IOT device: {k1}")
+        logger.debug(f"vault(1) in IOT device: : {Vault.getKey(0)}")
         M3 = Helpers.decrypt(k1,M3)
         message3 = M3.split("||")
         

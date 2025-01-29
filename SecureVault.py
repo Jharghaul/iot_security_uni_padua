@@ -50,8 +50,7 @@ def setKeys(stored_keys):
         logger.error(f"Error retrieving keys from the database, no keys were retrieved")
         raise ValueError("Attempt to set keys with an empty array was caught")
     
-    for i in range(len(stored_keys)):
-        keys[i] = stored_keys[i]
+    keys = stored_keys
             
 
 # Each key gets xor with the hmac(key, message)

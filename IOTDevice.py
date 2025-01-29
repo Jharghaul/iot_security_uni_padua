@@ -17,6 +17,25 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+
+# these two have do be defined before the executing code
+def read_keys_from_file():
+    keys = []
+    with open("keys.txt", "rb") as key_file:
+        # read keys from file
+        for i in range(n):
+            keys.append(key_file.readline())
+    for i in range(10):
+        print(i, keys[i], "\n")
+    Vault.setKeys(keys)
+
+
+def write_keys_to_file(keys):
+    with open("keys.txt", "rb") as key_file:
+        # Write keys to file
+        key_file.writelines(keys)
+
+
 # Client socket setup
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = (config['server']['host'], config['server']['port'])
@@ -32,13 +51,8 @@ buffersize = 1048579
 
 # SecureVault initialization = Key exchange
 Vault = sv
-with open("keys.txt", "rb") as key_file:
-   
-    keys = []
-    # Write keys to file
-    for i in range(n):
-        keys[i] = key_file.read()
-    Vault.setKeys(keys)
+keys = read_keys_from_file()
+Vault.setKeys(keys)
 
 
 
@@ -66,13 +80,15 @@ try:
     for i in tmp:
         C1_received.append(int(i))
     
-    # Check if r1 has the right value   #TODO ?
+    # retrieve r1 for the reply later
     r1_received = data[1]
 
 
     
     # Generate encryption key k1 from the keys in the challenge    
     k1 = bytes(Vault.key_length_bits) 
+    logger.debug(f"k1 in IOT device: {k1}")
+    logger.debug(f"vault(1) in IOT device: : {Vault.getKey(0)}")
     for i in C1_received:
         k1 = Helpers.xor_bytes(k1, Vault.getKey(i))
         
@@ -88,6 +104,7 @@ try:
 
     # Send M3 to server
     # M3 = Enc(k1, r1||t1||{C2,r2})
+    logger.log(Vault.getKey(0))
     message3 = r1_received + "||" + str(t1) + "||" + "{" + str(C2) + "," + str(r2) + "}"
     M3 = Helpers.encrypt(k1, message3)
     client_socket.sendto(M3, server_address)
@@ -122,15 +139,13 @@ try:
     # Change keys in vault and close the socket
     #messages = M1+M2+message3+M4
     #Vault.changeKeys(messages)     # TESTING implement a mechanism to save the new vault keys
-    with open("keys.txt", "wb") as key_file:
-   
-        # Write keys to file
-        for i in range(n):
-            key_file.write(Vault.getKey(i))
+    write_keys_to_file(Vault.getKeys)
 
-except Exception as e:
-    logger.error(e)
+#except Exception as e:
+ #   logger.error(e)
         
 finally:
     client_socket.close()
     logger.info("Client Socket was closed")
+
+
