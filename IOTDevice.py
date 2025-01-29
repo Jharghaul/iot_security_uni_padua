@@ -6,6 +6,7 @@ import SecureVault as sv
 import Database
 
 config = Helpers.load_config()
+n = config['globalVariables']['n']
 
 # Configure logging
 logging.basicConfig(
@@ -26,12 +27,19 @@ device_ids = ["123test", "456sensor", "789iot", "112device"]
 DeviceId = random.choice(device_ids)
 print(DeviceId)
                       
-SessionId = random.randint(1, 1000) # TESTING implement here how you get the SessionID
+SessionId = random.randint(1, n) # TESTING implement here how you get the SessionID
 buffersize = 1048579
 
 # SecureVault initialization = Key exchange
 Vault = sv
-Vault.initialize()
+with open("keys.txt", "rb") as key_file:
+   
+    keys = []
+    # Write keys to file
+    for i in n:
+        keys[i] = key_file.read()
+    Vault.setKeys(keys)
+
 
 
 try:
@@ -62,7 +70,7 @@ try:
     r1_received = data[1]
 
 
-    Vault.setKeys(Database.get_vault_of(DeviceId)) # TODO FIXME do not access Database (also delete Line 6 "import Database") but write it into some file 
+    
     # Generate encryption key k1 from the keys in the challenge    
     k1 = bytes(Vault.key_length_bits) 
     for i in C1_received:
@@ -114,7 +122,11 @@ try:
     # Change keys in vault and close the socket
     #messages = M1+M2+message3+M4
     #Vault.changeKeys(messages)     # TESTING implement a mechanism to save the new vault keys
-
+    with open("keys.txt", "wb") as key_file:
+   
+        # Write keys to file
+        for i in n:
+            key_file.write(Vault.getKey(i))
 
 except Exception as e:
     logger.error(e)
