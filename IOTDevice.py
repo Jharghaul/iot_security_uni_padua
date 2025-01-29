@@ -4,6 +4,7 @@ import socket
 import Helpers
 import SecureVault as sv
 import Database
+import base64
 
 config = Helpers.load_config()
 n = config['globalVariables']['n']
@@ -20,22 +21,27 @@ logger = logging.getLogger(__name__)
 
 # these two have do be defined before the executing code
 def read_keys_from_file():
+
     keys = []
-    with open("keys.txt", "rb") as key_file:
-        # read keys from file
+
+    with open("keys.txt", "r") as key_file:
+    
+    # Write keys to file
         for i in range(n):
-            keys.append(key_file.readline())
-    for i in range(10):
-        print(i, len(keys[i]), "\n")
-    Vault.setKeys(keys)
+            encodedKey = key_file.readline()
+            keys[i] = base64.b64decode(encodedKey)
+        Vault.setKeys(keys)
 
 
 def write_keys_to_file(keys):
-    with open("keys.txt", "wb") as key_file:
+    with open("keys.txt", "w") as key_file:
+   
         # Write keys to file
-        key_file.writelines(keys)
-        for i in range(3):
-            print(i, " ", keys[i])
+        for i in range(n):
+            encodedKey = base64.b64encode(Vault.getKey(i))
+            key_file.write(encodedKey)
+            key_file.write("\n")
+
 
 
 # Client socket setup
