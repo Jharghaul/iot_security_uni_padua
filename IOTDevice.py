@@ -26,14 +26,16 @@ def read_keys_from_file():
         for i in range(n):
             keys.append(key_file.readline())
     for i in range(10):
-        print(i, keys[i], "\n")
+        print(i, len(keys[i]), "\n")
     Vault.setKeys(keys)
 
 
 def write_keys_to_file(keys):
-    with open("keys.txt", "rb") as key_file:
+    with open("keys.txt", "wb") as key_file:
         # Write keys to file
         key_file.writelines(keys)
+        for i in range(3):
+            print(i, " ", keys[i])
 
 
 # Client socket setup

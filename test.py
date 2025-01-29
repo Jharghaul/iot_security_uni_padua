@@ -6,25 +6,25 @@ import SecureVault as sv
 
 vault = sv
 
-vault.initialize
+vault.initialize()
 
 n = 1000
 def read_keys_from_file():
     keys = []
     with open("keys.txt", "rb") as key_file:
         # read keys from file
-        for i in range(n):
-            keys.append(key_file.readline())
-    for i in range(10):
+        keys = key_file.read()
+    for i in range(3):
         print(i, keys[i], "\n")
     vault.setKeys(keys)
 
 
 def write_keys_to_file(keys):
-    with open("keys.txt", "rb") as key_file:
+    with open("keys.txt", "wb") as key_file:
         # Write keys to file
-        key_file.writelines(keys)
-            
+        key_file.write(keys)
+        for i in range(3):
+            print(i, " ", keys[i])
 
 
 
