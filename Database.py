@@ -1,5 +1,6 @@
 import sqlite3
 import Helpers
+import SecureVault as sv
 
 # Example implementation for a simple, small, local database
 
@@ -57,12 +58,15 @@ def is_valid_device_id(device_id):
 
 # TESTING adds a new deviceId to the database
 def add_device_id(device_id, device_type):
+    Vault = sv
+    Vault.initialize()
     connection = sqlite3.connect('iot_devices.db')
     cursor = connection.cursor()
 
     try:
         cursor.execute('INSERT INTO devices (device_id, device_type) VALUES (?, ?)', (device_id, device_type))
         connection.commit()
+        store_vault_of(device_id, Vault.getKeys())
     except sqlite3.IntegrityError:
         print(f"Device ID {device_id} already exists.") #TODO: exception an aufrufer geben
 

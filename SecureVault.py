@@ -1,6 +1,7 @@
 import hmac
 import hashlib
 import Helpers
+import logging
 
 # initial randomness
 masterkeys = ["doagW31MNuBTnvbrlDikILQI08vEBhZyhIRI96pc4RcmEimFOjtfbvqrNQ1COlBmclqrUS9T62LhH26W7SCGoAjRfNUfNBjUqudXRpZkIuBdJWwRUVT1cJ419mhvTJqj1IilXxOpoyq3gfIlEqz6liZCgKeWujdlis316syZPIOfOHnBf7fKQhFWQabmpX4JjhUscifhFg12AxrtKE0ncqjZTpq3oPMCzpFrvQIcCjcinedRuoZdHTbTYiLlpGwBvYwi5zVTyBxbkABFT5JnRMJQ6EIlEYHAHn6bQ7HMjzCuX1sgleR63cieaqD5kTwOw5KmyfUj8U4BVRCqaCpdqP2eYMZZ6Pp2yv5F88CixRfldhQiWY9rywXegMenVit5653EU4shrYxplTomfZrqqkz5AAktUEFmEPq6t17hxOlpPIEKDm53VDWIXwMvXzoBEfuo5xwxiOJroymg2vekoVbRikKZm7uqX6fA8voyOcs67LVci3c5LNbb15XT8zBJ",
@@ -12,14 +13,13 @@ masterkeys = ["doagW31MNuBTnvbrlDikILQI08vEBhZyhIRI96pc4RcmEimFOjtfbvqrNQ1COlBmc
 keys = []
 digestMode = hashlib.sha256
 key_length_bits = digestMode().digest_size * 8
-
+logger = logging.getLogger(__name__)
 
 config = Helpers.load_config()
 
 # initializes the secure vault by providing the number of keys that should be stored, as well as optionally the digestmode.
 # generates all keys by hashing the master key (and other keys if # keys > 5)
 def initialize():
-    
     n = config['globalVariables']['n']
 
     for i in range(n):
@@ -42,9 +42,13 @@ def getKey(index):
     
     return None
 
+def getKeys():
+    return keys
+
 def setKeys(stored_keys):
     if(stored_keys == None or stored_keys == []):
-        return
+        logger.error(f"Error retrieving keys from the database, no keys were retrieved")
+        raise ValueError("Attempt to set keys with an empty array was caught")
     
     for i in range(len(stored_keys)):
         keys[i] = stored_keys[i]
