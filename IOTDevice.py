@@ -3,7 +3,6 @@ import random       # TESTING not for productive use
 import socket
 import Helpers
 import SecureVault as sv
-import Database
 import base64
 
 config = Helpers.load_config()
@@ -20,27 +19,43 @@ logger = logging.getLogger(__name__)
 
 
 # these two have do be defined before the executing code
-def read_keys_from_file():
+def read_keys_from_file(deviceID):
 
     keys = []
 
-    with open("keys.txt", "r") as key_file:
+    file = deviceID+"_keys.txt"
+    with open(file, "rb") as key_file:
     
-    # Write keys to file
+    # Read keys from file
+        
+        blob = key_file.read()
+        print("blob length: ",len(blob))
         for i in range(n):
-            encodedKey = key_file.readline()
-            keys[i] = base64.b64decode(encodedKey)
-        Vault.setKeys(keys)
+            encodedKey = blob[i*32:(i+1)*32]
+            #encodedKey = encodedKey
+            keys.append(encodedKey)
+            
+            if i <= 3:
+                print("read file")
+                print(i, keys[i])
+    
+        #Vault.setKeys(keys)
+    return keys
 
 
-def write_keys_to_file(keys):
-    with open("keys.txt", "w") as key_file:
+def write_keys_to_file(keys, deviceID):
+    file = deviceID+"_keys.txt"
+    with open(file, "wb") as key_file:
    
         # Write keys to file
         for i in range(n):
-            encodedKey = base64.b64encode(Vault.getKey(i))
-            key_file.write(encodedKey)
-            key_file.write("\n")
+            #encodedKey = Vault.getKey(i).decode('utf-8')
+            key_file.write(Vault.getKey(i))
+            #key_file.write("\n")
+            if i <= 3:
+                print(i, keys[i])
+                #print("type: ", type(keys[i]))
+
 
 
 
@@ -50,7 +65,7 @@ server_address = (config['server']['host'], config['server']['port'])
 
 # IOT device settings
 # TESTING not for productive use, prove of concept, implement here how you get the DeviceID
-device_ids = ["123test", "456sensor", "789iot", "112device"]  
+device_ids = ["123test", "456sensor"]#, "789iot", "112device"]  
 DeviceId = random.choice(device_ids)
 print(DeviceId)
                       
@@ -58,9 +73,14 @@ SessionId = random.randint(1, n) # TESTING implement here how you get the Sessio
 buffersize = 1048579
 
 # SecureVault initialization = Key exchange
-Vault = sv
-keys = read_keys_from_file()
+Vault = sv.SecureVault()
+keys = read_keys_from_file(DeviceId)
+
+    
+print("setting keys")
 Vault.setKeys(keys)
+print(Vault.getKey(1))
+print(Vault.getKey(2))
 
 
 
@@ -98,6 +118,7 @@ try:
     logger.debug(f"k1 in IOT device: {k1}")
     logger.debug(f"vault(1) in IOT device: : {Vault.getKey(0)}")
     for i in C1_received:
+        #print("Type of Vault key: ", type(Vault.getKey(i)))
         k1 = Helpers.xor_bytes(k1, Vault.getKey(i))
         
     # Generate random number t1 and challenge C2    
@@ -112,7 +133,7 @@ try:
 
     # Send M3 to server
     # M3 = Enc(k1, r1||t1||{C2,r2})
-    logger.log(Vault.getKey(0))
+    logger.debug(f"Vault key 0 before sending M3: {Vault.getKey(0)}")
     message3 = r1_received + "||" + str(t1) + "||" + "{" + str(C2) + "," + str(r2) + "}"
     M3 = Helpers.encrypt(k1, message3)
     client_socket.sendto(M3, server_address)
@@ -131,7 +152,9 @@ try:
     k2 = bytes(Vault.key_length_bits) 
     for i in C2:
         k2 = Helpers.xor_bytes(k2, Vault.getKey(i))
-
+    
+    k2 = Helpers.xor_bytes(k2, t1.to_bytes(64, "little"))
+    
     M4 = Helpers.decrypt(k2, M4)
 
     message4 = M4.split("||")
@@ -139,15 +162,16 @@ try:
         logger.debug("r2 check succeded")
     else:
         logger.error("r2 check failed ")
+        raise ValueError("r2 was not correct")
 
     # compute session key t
     # TESTING use for further communcation
     t = t1^int(message4[1])
 
     # Change keys in vault and close the socket
-    #messages = M1+M2+message3+M4
-    #Vault.changeKeys(messages)     # TESTING implement a mechanism to save the new vault keys
-    write_keys_to_file(Vault.getKeys)
+    messages = M1+M2+message3+M4
+    Vault.changeKeys(messages)     # TESTING implement a mechanism to save the new vault keys
+    write_keys_to_file(Vault.getKeys(), DeviceId)
 
 #except Exception as e:
  #   logger.error(e)

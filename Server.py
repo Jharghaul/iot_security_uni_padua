@@ -4,7 +4,7 @@ import Database
 import Helpers
 import SecureVault as sv
 
-Vault = sv
+Vault = sv.SecureVault()
 Vault.initialize()
 
 config = Helpers.load_config()
@@ -33,8 +33,8 @@ def start_server():
         while True:
             handle_client(server_socket)
 
-    except Exception as e:   
-        logger.error(f"Exchange failed: {e}")
+    #except Exception as e:   
+     #   logger.error(f"Exchange failed: {e}")
 
     finally:
         # Close the socket
@@ -122,7 +122,7 @@ def handle_client(server_socket):
             # Send M4 back to IOT device
             # M4 = Enc(k2^t1, r2||t2)
             message4 = str(r2) + "||" + str(t2)
-            encrypt_key_M4 = Helpers.xor_bytes(k2,bytes(t1))
+            encrypt_key_M4 = Helpers.xor_bytes(k2,t1.to_bytes(64, "little"))
             M4 = Helpers.encrypt(encrypt_key_M4, message4)
             server_socket.sendto(M4, client_address)
             logger.info(f"{client_address}: Sent M4")
@@ -137,11 +137,12 @@ def handle_client(server_socket):
             logger.info("Changed keys")
             Database.store_vault_of(deviceID, new_keys)
             
-    except Exception as e:
-        logger.error(f"Error while handling client {client_address}: {e}")
-        error = f"error: {e}"       # sending the IOT device the exception message to inform about the server side error
-        server_socket.sendto(error.encode(), client_address)
-        
+    #except Exception as e:
+     #   logger.error(f"Error while handling client {client_address}: {e}")
+      #  error = f"error: {e}"       # sending the IOT device the exception message to inform about the server side error
+       # server_socket.sendto(error.encode(), client_address)
+    finally:
+        server_socket.sendto("error finally".encode(), client_address)
 
 if __name__ == "__main__":
     start_server()

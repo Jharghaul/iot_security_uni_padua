@@ -3,33 +3,38 @@ import hashlib
 from Crypto import Random # pip install --upgrade pycryptodome 
 from Crypto.Cipher import AES
 import SecureVault as sv
+import urllib.parse as url
 
-vault = sv
-
-vault.initialize()
-
+Vault = sv.SecureVault()
 n = 1000
-def read_keys_from_file():
-    keys = []
-    with open("keys.txt", "rb") as key_file:
-        # read keys from file
-        keys = key_file.read()
-    for i in range(3):
-        print(i, keys[i], "\n")
-    vault.setKeys(keys)
+
+Vault.initialize()
+print("Test")
+print(len(Vault.getKeys()))
+
 
 
 def write_keys_to_file(keys):
-    with open("keys.txt", "wb") as key_file:
+    with open("keys_original.txt", "wb") as key_file:
+   
         # Write keys to file
-        key_file.write(keys)
-        for i in range(3):
-            print(i, " ", keys[i])
+        for i in range(n):
+            #encodedKey = Vault.getKey(i).decode('utf-8')
+            key_file.write(Vault.getKey(i))
+            #key_file.write("\n")
+            if i <= 3:
+                print(i, keys[i])
+                #print("type: ", type(keys[i]))
 
+def write_keys_to_files_ugly(keys):
+    filepath = "key_"
+    for i in range(n):
+        print("ups")
+        
 
-
-write_keys_to_file(vault.getKeys())
-read_keys_from_file()
+write_keys_to_file(Vault.getKeys())
+print()
+#read_keys_from_file()
 
 
 # python C:\Users\grane\Documents\GitHub\iot_security_uni_padua\

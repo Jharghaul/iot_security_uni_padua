@@ -59,7 +59,7 @@ def is_valid_device_id(device_id):
 
 # TESTING adds a new deviceId to the database
 def add_device_id(device_id, device_type):
-    Vault = sv
+    Vault = sv.SecureVault()
     Vault.initialize()
     connection = sqlite3.connect('iot_devices.db')
     cursor = connection.cursor()
