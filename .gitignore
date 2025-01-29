@@ -2,3 +2,8 @@
 __pycache__/
 iot_devices.db
 iot_devices.db-journal
+112device_keys.txt
+123test_keys.txt
+456sensor_keys.txt
+789iot_keys.txt
+keys_original.txt
