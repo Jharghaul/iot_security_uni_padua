@@ -34,8 +34,9 @@ def create_database():
         
         
         # TESTING for testing purposes, 
-        cursor.execute('INSERT or IGNORE INTO devices (device_id, device_type) VALUES (?, ?)', ("123test", "test sensor"))
-
+        
+        add_device_id("123test", "test sensor")
+        add_device_id("456sensor", "test sensor")
         connection.commit()
     except Exception as e:
         raise e
