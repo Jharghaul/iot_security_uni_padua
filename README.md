@@ -2,7 +2,7 @@
 
 The objective of this project is to implement the authentication protocol as described in
 the provided reference paper. As well as that, we aim to provide an implementation of Secure Vaults, a storage
-capability for keys.
+capability for keys. You can find the reference paper here:  https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8455985
 
 The authentication protocol in use is a modulation of a three-way handshake protocol,
 whereby both client and server challenge each other to provide means to authenticate
@@ -25,3 +25,19 @@ encrypted under k2 ⊕ t1 to the client.
 in the message is correct. If it is incorrect the client aborts.
 7. In the end both the client and the server generate the session key t by computing
 t1 ⊕ t2
+
+## Set-Up
+
+To run the code, you have to install the pycryptodome library.
+
+## Running the Code
+
+You need to run server.py in one process first. It is going to wait and listen for incoming connections for clients. One first start, it is going to create a database for storing the keys.
+After that, you can run IOTDevice.py. It is going to randomly choose one IOTDevice, reading that device's keys from the \[device_name\]_keys.txt
+Some of the devices have invalid IDs. If the server encounters an invalid ID, it is going to stop the communication with that device.
+If the device ID is valid, it is going to run the attestation protocol and in the end both server and client change the keys.
+
+## Troubleshooting
+
+If you connection gets out of sync or you encounter other problems leading to not being able to successfully running the protocol again, try deleting the database on the server's side and overwritting the devices' key files with the default keys. These can be found in the file keys.txt and should not be tempered with. Otherwise you can generate them yourself by calling SecureVault.initialize and afterwards calling IOTDevice.write_keys_to_file with the obtained keys.
+After that step, restart the server and the client.
