@@ -69,7 +69,7 @@ def handle_client(server_socket):
         logger.debug(f"{client_address}: C1 generated")
         
         # Generate encryption key k1 from the keys in the challenge C1
-        # IOTDevice does the same on it's side 
+        # IoTDevice does the same on it's side 
         k1 = bytes(vault.key_length_bits)
         for i in C1:
             k1 = Helpers.xor_bytes(k1, vault.getKey(i))
@@ -77,23 +77,23 @@ def handle_client(server_socket):
         logger.debug(f"{client_address}: k1 generated")
         
 
-        # Send M2 back to IOT device
+        # Send M2 back to IoT device
         # M2 = { C1 || r1 }
         M2 = "{" + str(C1) + "||" + str(r1) + "}"
         logger.info(f"{client_address}: Sent M2")
         server_socket.sendto(M2.encode(), client_address)
         
-        # Receive M3 from IOT device
+        # Receive M3 from IoT device
         data, client_address = server_socket.recvfrom(config['globalVariables']['buffersize'])
         M3 = data.decode()
         logger.info(f"{client_address}: Received M3")
-        logger.debug(f"k1 in IOT device: {k1}")
-        logger.debug(f"vault(1) in IOT device: : {vault.getKey(0)}")
+        logger.debug(f"k1 in IoT device: {k1}")
+        logger.debug(f"vault(1) in IoT device: : {vault.getKey(0)}")
         M3 = Helpers.decrypt(k1,M3)
         message3 = M3.split("||")
         
         # Verify the IoT devices response
-        # if the IOT device uses a different k1 than the server,
+        # if the IoT device uses a different k1 than the server,
         # the transmitted r1 is not the same as the the servers r1 
         if(int(message3[0])!= r1):     
             logger.error(f"{client_address}: The encryption key or r1 is not correct")
@@ -116,13 +116,13 @@ def handle_client(server_socket):
                     raise ValueError("encountered ValueError while reading message3")
 
             # Generate encryption key k2 from the keys in the challenge C2
-            # IOT device does the same on it's side 
+            # IoT device does the same on it's side 
             k2 = bytes(vault.key_length_bits) 
             for i in C2:
                 k2 = Helpers.xor_bytes(k2, vault.getKey(i))
             t2 = Helpers.randInt()
 
-            # Send M4 back to IOT device
+            # Send M4 back to IoT device
             # M4 = Enc(k2^t1, r2||t2)
             message4 = str(r2) + "||" + str(t2)
             encrypt_key_M4 = Helpers.xor_bytes(k2,t1.to_bytes(64, "little"))
@@ -142,7 +142,7 @@ def handle_client(server_socket):
             
     except Exception as e:
         logger.error(f"Error while handling client {client_address}: {e}")
-        error = f"error: {e}"       # Sending the IOT device the exception message to inform about the server side error
+        error = f"error: {e}"       # Sending the IoT device the exception message to inform about the server side error
         server_socket.sendto(error.encode(), client_address)
 
 if __name__ == "__main__":

@@ -46,7 +46,7 @@ def write_keys_to_file(keys, device_ID):
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = (config['server']['host'], config['server']['port'])
 
-# IOT device settings
+# IoT device settings
 # TESTING not for productive use, prove of concept, implement here how you get the DeviceID
 deviceIDs = ["123test", "456sensor", "789iot", "112device"]  
 deviceID = random.choice(deviceIDs)
@@ -77,6 +77,7 @@ try:
         logger.error("M2 contained error message:")
         raise Exception(M2)
     
+    # Getting challenge C1 and r1 from M2
     data = M2[1:-1].split("||") # Remove { } and split
     tmp = data[0]
     tmp = tmp[1: -1].split(",")
@@ -84,14 +85,13 @@ try:
     for i in tmp:
         C1_received.append(int(i))
     
-    # Retrieve r1 for the reply later
     r1_received = data[1]
 
 
-    # Generate encryption key k1 from the keys in the challenge    
+    # Generate encryption key k1 from the keys in the challenge C1  
     k1 = bytes(vault.key_length_bits) 
-    logger.debug(f"k1 in IOT device: {k1}")
-    logger.debug(f"vault(1) in IOT device: : {vault.getKey(0)}")
+    logger.debug(f"k1 in IoT device: {k1}")
+    logger.debug(f"vault(1) in IoT device: : {vault.getKey(0)}")
     for i in C1_received:
         k1 = Helpers.xor_bytes(k1, vault.getKey(i))
         
@@ -122,15 +122,16 @@ try:
     if M4.startswith("error"):
         logger.error("M4 contained error message:")
         raise Exception(M4)
-
+    
+    # Generate encryption key k2 from the keys in the challenge C2
     k2 = bytes(vault.key_length_bits) 
     for i in C2:
         k2 = Helpers.xor_bytes(k2, vault.getKey(i))
     
     k2 = Helpers.xor_bytes(k2, t1.to_bytes(64, "little"))
-    
     M4 = Helpers.decrypt(k2, M4)
 
+    # Getting r2 and t2 from M4
     message4 = M4.split("||")
     if(message4[0]==str(r2)): #r2 in M4
         logger.debug("r2 check succeded")
