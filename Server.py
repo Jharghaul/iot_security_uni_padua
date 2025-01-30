@@ -48,6 +48,7 @@ def handle_client(server_socket):
         data, client_address = server_socket.recvfrom(config['globalVariables']['buffersize'])
         M1 = data.decode()
         logger.info(f"{client_address}: Received M1")
+        logger.debug(f"M1: {M1}")
         message1 = M1.split("||")
         deviceID = message1[0]
 
@@ -74,12 +75,12 @@ def handle_client(server_socket):
         for i in C1:
             k1 = Helpers.xor_bytes(k1, vault.getKey(i))
             
-        logger.debug(f"{client_address}: k1 generated")
-        
+        logger.debug(f"{client_address}: k1 generated: {k1}")
 
         # Send M2 back to IoT device
         # M2 = { C1 || r1 }
         M2 = "{" + str(C1) + "||" + str(r1) + "}"
+        logger.debug(f"M2: {M2}")
         logger.info(f"{client_address}: Sent M2")
         server_socket.sendto(M2.encode(), client_address)
         
@@ -87,9 +88,8 @@ def handle_client(server_socket):
         data, client_address = server_socket.recvfrom(config['globalVariables']['buffersize'])
         M3 = data.decode()
         logger.info(f"{client_address}: Received M3")
-        logger.debug(f"k1 in IoT device: {k1}")
-        logger.debug(f"vault(1) in IoT device: : {vault.getKey(0)}")
         M3 = Helpers.decrypt(k1,M3)
+        logger.debug(f"M3 decrypted: {M3}")
         message3 = M3.split("||")
         
         # Verify the IoT devices response
@@ -125,7 +125,12 @@ def handle_client(server_socket):
             # Send M4 back to IoT device
             # M4 = Enc(k2^t1, r2||t2)
             message4 = str(r2) + "||" + str(t2)
+            logger.debug(f"M4 before encrypting: {message4}")
+            
             encrypt_key_M4 = Helpers.xor_bytes(k2,t1.to_bytes(64, "little"))
+            
+            logger.debug(f"Encryption key k2^t1: {encrypt_key_M4}")
+            
             M4 = Helpers.encrypt(encrypt_key_M4, message4)
             server_socket.sendto(M4, client_address)
             logger.info(f"{client_address}: Sent M4")
@@ -133,6 +138,8 @@ def handle_client(server_socket):
             # Compute session key t
             # TESTING use for further communcation
             t = t1^t2
+            logger.debug(f"t: {t}")
+            
 
             # Change keys in vault and store them in database
             messages = M1+M2+M3+message4

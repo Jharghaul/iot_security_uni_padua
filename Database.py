@@ -49,6 +49,7 @@ def create_database():
         
         add_device_id("123test", "test sensor")
         add_device_id("456sensor", "test sensor")
+        logger.debug(f"Database created with 123test and 456sensor")
         connection.commit()
     except Exception as e:
         raise e

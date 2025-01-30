@@ -24,7 +24,7 @@ def read_keys_from_file(device_ID):
     with open(file, "rb") as key_file:
         # Read keys from file
         all_keys = key_file.read()
-        logger.debug(f"blob length: {len(all_keys)}")
+        #logger.debug(f"blob length: {len(all_keys)}")
 
         # separate keys 
         for i in range(n):
@@ -48,11 +48,11 @@ server_address = (config['server']['host'], config['server']['port'])
 
 # IoT device settings
 # TESTING not for productive use, prove of concept, implement here how you get the DeviceID
-deviceIDs = ["123test", "456sensor", "789iot", "112device"]  
+deviceIDs = ["123test", "456sensor", "789iot"]#, "112device"]  
 deviceID = random.choice(deviceIDs)
-logger.debug(f"{deviceID}")
-                      
+                 
 sessionID = random.randint(1, n) # TESTING implement here how you get the SessionID
+logger.debug(f"DeviceID: {deviceID}, SessionID: {sessionID}")
 buffersize = 1048579
 
 # SecureVault initialization from file
@@ -71,6 +71,7 @@ try:
     logger.info("M2 received")
     
     M2 = M2.decode()
+    logger.debug(f"M2: {M2}")
     
     # Check if M2 is a error message
     if M2.startswith("error"):
@@ -90,11 +91,12 @@ try:
 
     # Generate encryption key k1 from the keys in the challenge C1  
     k1 = bytes(vault.key_length_bits) 
-    logger.debug(f"k1 in IoT device: {k1}")
-    logger.debug(f"vault(1) in IoT device: : {vault.getKey(0)}")
+    #logger.debug(f"k1 in IoT device: {k1}")
+    #logger.debug(f"vault(1) in IoT device: : {vault.getKey(0)}")
     for i in C1_received:
         k1 = Helpers.xor_bytes(k1, vault.getKey(i))
         
+    logger.debug(f"k1: {k1}")
     # Generate random number t1 and challenge C2    
     t1 = Helpers.randInt() 
     C2 = Helpers.generateChallenge()
@@ -107,8 +109,9 @@ try:
 
     # Send M3 to server
     # M3 = Enc(k1, r1||t1||{C2,r2})
-    logger.debug(f"Vault key 0 before sending M3: {vault.getKey(0)}")
+    #logger.debug(f"Vault key 0 before sending M3: {vault.getKey(0)}")
     message3 = r1_received + "||" + str(t1) + "||" + "{" + str(C2) + "," + str(r2) + "}"
+    logger.debug(f"M3 before encrypting: {message3}")
     M3 = Helpers.encrypt(k1, message3)
     client_socket.sendto(M3, server_address)
     logger.info("M3 sent")  
@@ -129,7 +132,11 @@ try:
         k2 = Helpers.xor_bytes(k2, vault.getKey(i))
     
     k2 = Helpers.xor_bytes(k2, t1.to_bytes(64, "little"))
+    logger.debug(f"Encryption key k2^t1: {k2}")
+    
     M4 = Helpers.decrypt(k2, M4)
+    logger.debug(f"M4 decrypted: {M4}")
+    
 
     # Getting r2 and t2 from M4
     message4 = M4.split("||")
@@ -143,7 +150,8 @@ try:
     # TESTING use for further communcation
     t2 = message4[1]
     t = t1^int(t2)
-
+    logger.debug(f"t: {t}")
+    
     # Change keys in vault and in file for storage
     messages = M1+M2+message3+M4
     vault.changeKeys(messages)
