@@ -29,7 +29,8 @@ t1 ⊕ t2
 ## Set-Up
 
 To run the code, you have to install the pycryptodome library.
-```# pip install --upgrade pycryptodome```
+
+```pip install --upgrade pycryptodome```
 
 ## Running the Code
 
@@ -40,5 +41,5 @@ If the device ID is valid, it is going to run the attestation protocol and in th
 
 ## Troubleshooting
 
-If you connection gets out of sync or you encounter other problems leading to not being able to successfully running the protocol again, try deleting the database on the server's side and overwritting the devices' key files with the default keys. These can be found in the file keys.txt and should not be tempered with. Otherwise you can generate them yourself by calling SecureVault.initialize and afterwards calling IOTDevice.write_keys_to_file with the obtained keys.
+If you connection gets out of sync or you encounter other problems leading to not being able to successfully running the protocol again, try deleting the database on the server's side and overwritting the devices' key files with the default keys. These can be found in the file keys.txt and should not be tempered with. Otherwise you can generate them yourself by calling SecureVault.initialize and afterwards calling IOTDevice.write_keys_to_file with the obtained keys. You can see how to and use Setup_keys.py for that purpose.
 After that step, restart the server and the client.
