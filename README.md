@@ -29,6 +29,7 @@ t1 ⊕ t2
 ## Set-Up
 
 To run the code, you have to install the pycryptodome library.
+```# pip install --upgrade pycryptodome```
 
 ## Running the Code
 
