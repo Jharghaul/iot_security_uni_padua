@@ -50,7 +50,7 @@ class SecureVault:
 
     def setKeys(self, stored_keys):
         if(stored_keys == None or stored_keys == []):
-            logger.error(f"Error retrieving keys from the database, no keys were retrieved")
+            self.logger.error(f"Error retrieving keys from the database, no keys were retrieved")
             raise ValueError("Attempt to set keys with an empty array was caught")
         
         self.keys = stored_keys
@@ -58,8 +58,6 @@ class SecureVault:
 
     # Each key gets xor with the hmac(key, message)
     def changeKeys(self, message):
-        
-        print("length of self.keys in changeKeys: ", len(self.keys))
         for i in range(len(self.keys)):
             digest = hmac.new(self.keys[i], message.encode("utf-8"), self.digestMode).digest()
             

@@ -14,36 +14,33 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler()]  # Log to the console
 )
-
 logger = logging.getLogger(__name__)
 
-
-# These two have do be defined before the executing code
-def read_keys_from_file(deviceID):
-
+# Reads all keys from a binary file
+def read_keys_from_file(device_ID):
     keys = []
+    file = device_ID+"_keys.txt"
 
-    file = deviceID+"_keys.txt"
     with open(file, "rb") as key_file:
-    
-    # Read keys from file
-        
-        blob = key_file.read()
-        logger.debug("blob length: ",len(blob))
+        # Read keys from file
+        all_keys = key_file.read()
+        logger.debug(f"blob length: {len(all_keys)}")
+
+        # separate keys 
         for i in range(n):
-            encodedKey = blob[i*32:(i+1)*32]
-            keys.append(encodedKey)
+            single_key = all_keys[i*32:(i+1)*32]
+            keys.append(single_key)
             
     return keys
 
-
-def write_keys_to_file(keys, deviceID):
-    file = deviceID+"_keys.txt"
+# Writes all keys to a binary file
+def write_keys_to_file(keys, device_ID):
+    file = device_ID+"_keys.txt"
     with open(file, "wb") as key_file:
    
         # Write keys to file
         for i in range(n):
-            key_file.write(Vault.getKey(i))
+            key_file.write(vault.getKey(i))
            
 # Client socket setup
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -51,21 +48,21 @@ server_address = (config['server']['host'], config['server']['port'])
 
 # IOT device settings
 # TESTING not for productive use, prove of concept, implement here how you get the DeviceID
-device_ids = ["123test", "456sensor"]#, "789iot", "112device"]  
-DeviceId = random.choice(device_ids)
-logger.debug(f"{DeviceId}")
+deviceIDs = ["123test", "456sensor", "789iot", "112device"]  
+deviceID = random.choice(deviceIDs)
+logger.debug(f"{deviceID}")
                       
-SessionId = random.randint(1, n) # TESTING implement here how you get the SessionID
+sessionID = random.randint(1, n) # TESTING implement here how you get the SessionID
 buffersize = 1048579
 
-# SecureVault initialization = Key exchange
-Vault = sv.SecureVault()
-keys = read_keys_from_file(DeviceId)
-Vault.setKeys(keys)
+# SecureVault initialization from file
+vault = sv.SecureVault()
+keys = read_keys_from_file(deviceID)
+vault.setKeys(keys)
 
 try:
     # Send M1
-    M1 = str(DeviceId) +"||"+  str(SessionId)
+    M1 = str(deviceID) +"||"+  str(sessionID)
     client_socket.sendto(M1.encode(), server_address)
     logger.info("M1 sent")  
             
@@ -92,11 +89,11 @@ try:
 
 
     # Generate encryption key k1 from the keys in the challenge    
-    k1 = bytes(Vault.key_length_bits) 
+    k1 = bytes(vault.key_length_bits) 
     logger.debug(f"k1 in IOT device: {k1}")
-    logger.debug(f"vault(1) in IOT device: : {Vault.getKey(0)}")
+    logger.debug(f"vault(1) in IOT device: : {vault.getKey(0)}")
     for i in C1_received:
-        k1 = Helpers.xor_bytes(k1, Vault.getKey(i))
+        k1 = Helpers.xor_bytes(k1, vault.getKey(i))
         
     # Generate random number t1 and challenge C2    
     t1 = Helpers.randInt() 
@@ -110,7 +107,7 @@ try:
 
     # Send M3 to server
     # M3 = Enc(k1, r1||t1||{C2,r2})
-    logger.debug(f"Vault key 0 before sending M3: {Vault.getKey(0)}")
+    logger.debug(f"Vault key 0 before sending M3: {vault.getKey(0)}")
     message3 = r1_received + "||" + str(t1) + "||" + "{" + str(C2) + "," + str(r2) + "}"
     M3 = Helpers.encrypt(k1, message3)
     client_socket.sendto(M3, server_address)
@@ -126,9 +123,9 @@ try:
         logger.error("M4 contained error message:")
         raise Exception(M4)
 
-    k2 = bytes(Vault.key_length_bits) 
+    k2 = bytes(vault.key_length_bits) 
     for i in C2:
-        k2 = Helpers.xor_bytes(k2, Vault.getKey(i))
+        k2 = Helpers.xor_bytes(k2, vault.getKey(i))
     
     k2 = Helpers.xor_bytes(k2, t1.to_bytes(64, "little"))
     
@@ -141,20 +138,21 @@ try:
         logger.error("r2 check failed ")
         raise ValueError("r2 was not correct")
 
-    # compute session key t
+    # Compute session key t
     # TESTING use for further communcation
     t2 = message4[1]
     t = t1^int(t2)
 
-    # Change keys in vault and close the socket
+    # Change keys in vault and in file for storage
     messages = M1+M2+message3+M4
-    Vault.changeKeys(messages)     # TESTING implement a mechanism to save the new vault keys
-    write_keys_to_file(Vault.getKeys(), DeviceId)
+    vault.changeKeys(messages)
+    write_keys_to_file(vault.getKeys(), deviceID)
 
 except Exception as e:
     logger.error(e)
         
 finally:
+    # Close the socket
     client_socket.close()
     logger.info("Client Socket was closed")
 

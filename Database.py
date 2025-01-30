@@ -1,8 +1,20 @@
 import sqlite3
 import Helpers
 import SecureVault as sv
+import logging
 
 # Example implementation for a simple, small, local database
+
+config = Helpers.load_config()
+
+# Configure logging
+logging.basicConfig(
+    level=config['logging']['level'],
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()]  # Log to the console
+)
+
+logger = logging.getLogger(__name__)
 
 # Creates SQLite database if not existing
 def create_database():
@@ -59,17 +71,17 @@ def is_valid_device_id(device_id):
 
 # TESTING adds a new deviceId to the database
 def add_device_id(device_id, device_type):
-    Vault = sv.SecureVault()
-    Vault.initialize()
+    vault = sv.SecureVault()
+    vault.initialize()
     connection = sqlite3.connect('iot_devices.db')
     cursor = connection.cursor()
 
     try:
         cursor.execute('INSERT INTO devices (device_id, device_type) VALUES (?, ?)', (device_id, device_type))
         connection.commit()
-        store_vault_of(device_id, Vault.getKeys())
+        store_vault_of(device_id, vault.getKeys())
     except sqlite3.IntegrityError as e:
-        print(f"Device ID {device_id} already exists.") #TODO: exception an aufrufer geben
+        logger.error(f"Device ID {device_id} already exists.")
     finally:
         connection.close()
 

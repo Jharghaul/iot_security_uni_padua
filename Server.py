@@ -4,8 +4,8 @@ import Database
 import Helpers
 import SecureVault as sv
 
-Vault = sv.SecureVault()
-Vault.initialize()
+vault = sv.SecureVault()
+vault.initialize()
 
 config = Helpers.load_config()
 
@@ -15,7 +15,6 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler()]  # Log to the console
 )
-
 logger = logging.getLogger(__name__)
 
 def start_server():
@@ -57,7 +56,7 @@ def handle_client(server_socket):
             logger.info(f"{client_address}: The device is valid")
             keys = Database.get_vault_of(deviceID)
             logger.debug(f"{client_address}: keys are set")
-            Vault.setKeys(keys)
+            vault.setKeys(keys)
             logger.debug(f"{client_address}: vault is set")
             
         else:
@@ -71,9 +70,9 @@ def handle_client(server_socket):
         
         # Generate encryption key k1 from the keys in the challenge C1
         # IOTDevice does the same on it's side 
-        k1 = bytes(Vault.key_length_bits)
+        k1 = bytes(vault.key_length_bits)
         for i in C1:
-            k1 = Helpers.xor_bytes(k1, Vault.getKey(i))
+            k1 = Helpers.xor_bytes(k1, vault.getKey(i))
             
         logger.debug(f"{client_address}: k1 generated")
         
@@ -89,7 +88,7 @@ def handle_client(server_socket):
         M3 = data.decode()
         logger.info(f"{client_address}: Received M3")
         logger.debug(f"k1 in IOT device: {k1}")
-        logger.debug(f"vault(1) in IOT device: : {Vault.getKey(0)}")
+        logger.debug(f"vault(1) in IOT device: : {vault.getKey(0)}")
         M3 = Helpers.decrypt(k1,M3)
         message3 = M3.split("||")
         
@@ -107,16 +106,20 @@ def handle_client(server_socket):
             # Read the random number r2 and the challenge C2 from M3
             r2 = message3.split(",")[-1]
             C2 = []
-            temp = message3[1:(message3.find(message3.split(",")[-1])-2)].split(",")    # Split off r2 and the [ ], then split for the challenge
+            # Split off r2 and the [ ], then split for the challenge
+            temp = message3[1:(message3.find(message3.split(",")[-1])-2)].split(",")    
             
             for i in temp:  # Values were transmitted as string and have to be turned back to int
-                C2.append(int(i))   # TODO: wenn noch elan dafür da: hier try catch ValueError
+                try:
+                    C2.append(int(i))
+                except:
+                    raise ValueError("encountered ValueError while reading message3")
 
             # Generate encryption key k2 from the keys in the challenge C2
             # IOT device does the same on it's side 
-            k2 = bytes(Vault.key_length_bits) 
+            k2 = bytes(vault.key_length_bits) 
             for i in C2:
-                k2 = Helpers.xor_bytes(k2, Vault.getKey(i))
+                k2 = Helpers.xor_bytes(k2, vault.getKey(i))
             t2 = Helpers.randInt()
 
             # Send M4 back to IOT device
@@ -131,14 +134,14 @@ def handle_client(server_socket):
             # TESTING use for further communcation
             t = t1^t2
 
-            # Change keys in vault and close the socket
+            # Change keys in vault and store them in database
             messages = M1+M2+M3+message4
-            new_keys = Vault.changeKeys(messages)     # TESTING implement a mechanism to save the new vault keys
+            new_keys = vault.changeKeys(messages)
             logger.info("Changed keys")
             Database.store_vault_of(deviceID, new_keys)
             
     except Exception as e:
-       logger.error(f"Error while handling client {client_address}: {e}")
+        logger.error(f"Error while handling client {client_address}: {e}")
         error = f"error: {e}"       # Sending the IOT device the exception message to inform about the server side error
         server_socket.sendto(error.encode(), client_address)
 
