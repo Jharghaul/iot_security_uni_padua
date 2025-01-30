@@ -32,7 +32,7 @@ To run the code, you have to install the pycryptodome library.
 
 ## Running the Code
 
-You need to run server.py in one process first. It is going to wait and listen for incoming connections for clients. One first start, it is going to create a database for storing the keys.
+You need to run server.py in one process first. It is going to wait and listen for incoming connections for clients. On its first start, it is going to create a database for storing the keys.
 After that, you can run IOTDevice.py. It is going to randomly choose one IOTDevice, reading that device's keys from the \[device_name\]_keys.txt
 Some of the devices have invalid IDs. If the server encounters an invalid ID, it is going to stop the communication with that device.
 If the device ID is valid, it is going to run the attestation protocol and in the end both server and client change the keys.
